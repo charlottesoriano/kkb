@@ -14,8 +14,8 @@ export class UserFavoritesResolver {
   }
 
   @Query(() => [UserFavorite], { name: 'userFavorites' })
-  findAll() {
-    return this.userFavoritesService.findAll();
+  findAll(@Args('userId', { type: () => String }) userId: string) {
+    return this.userFavoritesService.findAll(userId);
   }
 
   @Query(() => UserFavorite, { name: 'userFavorite' })
