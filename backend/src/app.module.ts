@@ -12,6 +12,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Request } from 'express';
 import { SupabaseModule } from './supabase/supabase.module.js';
 import { ConfigModule } from '@nestjs/config';
+import { UsersModule } from './users/users.module.js';
+import { UserFavoritesModule } from './user-favorites/user-favorites.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -28,7 +30,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     GroupsModule,
     BalancesModule,
     SettlementsModule,
-    NotificationsModule],
+    NotificationsModule,
+    UsersModule,
+    UserFavoritesModule],
   controllers: [AppController],
   providers: [AppService],
 })
