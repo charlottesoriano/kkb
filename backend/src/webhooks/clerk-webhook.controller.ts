@@ -37,17 +37,39 @@ export class ClerkWebhookController {
       const u = evt.data;
       const { error } = await this.supabase.from('users').upsert(
         {
-          user_id: u.id,
+          id: u.id,
+          email: u.email_addresses[0].email_address,
           display_name: [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username,
-          avatar_url: u.image_url,
+          first_name: u.first_name,
+          last_name: u.last_name,
+          image_url: u.image_url,
         },
-        { onConflict: 'user_id' },
+        { onConflict: 'id' },
       );
       if (error) throw error; // a non-2xx response makes Clerk retry
     }
 
+    // anonymise instead of deleting so expenses they paid for keep a valid paid_by
     if (evt.type === 'user.deleted' && evt.data.id) {
-      await this.supabase.from('users').delete().eq('user_id', evt.data.id);
+      const id = evt.data.id;
+      const { error } = await this.supabase
+        .from('users')
+        .update({
+          email: null,
+          display_name: 'Deleted user',
+          first_name: null,
+          last_name: null,
+          image_url: null,
+          deleted_at: new Date().toISOString(),
+        })
+        .eq('id', id);
+      if (error) throw error;
+
+      // personal data that isn't part of shared group history
+      const favorites = await this.supabase.from('user_favorites').delete().eq('user_id', id);
+      if (favorites.error) throw favorites.error;
+      const tokens = await this.supabase.from('device_tokens').delete().eq('user_id', id);
+      if (tokens.error) throw tokens.error;
     }
 
     return { received: true };

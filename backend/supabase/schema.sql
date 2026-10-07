@@ -1,3 +1,14 @@
+create table users (
+  id          text primary key,
+  email       text unique,
+  display_name text,
+  first_name  text,
+  last_name   text,
+  image_url   text,
+  created_at  timestamptz default now(),
+  deleted_at  timestamptz                    -- set when anonymised after Clerk deletion
+);
+
 create table groups (
   id          bigint generated always as identity primary key,
   name        text not null,
@@ -9,7 +20,7 @@ create table groups (
 create table members (
   id         bigint generated always as identity primary key,
   group_id   bigint not null references groups(id) on delete cascade,
-  user_id    text not null,
+  user_id    text not null references users(id) on delete cascade,
   joined_at  timestamptz not null default now(),
   unique (group_id, user_id)
 );
@@ -19,7 +30,7 @@ create table expenses (
   group_id     bigint not null references groups(id) on delete cascade,
   description  text not null,
   amount       numeric(12, 2) not null check (amount > 0),
-  paid_by      text not null,
+  paid_by      text not null references users(id),
   created_at   timestamptz not null default now()
 );
 
@@ -51,13 +62,12 @@ create table device_tokens (
   unique (user_id, token)
 );
 
-create table users (
-  id          text primary key,
-  email       text unique,
-  first_name  text,
-  last_name   text,
-  image_url   text,
-  created_at  timestamptz default now()
+create table user_favorites (
+  id          bigint generated always as identity primary key,
+  user_id     text not null references users(id) on delete cascade,
+  group_id    bigint not null references groups(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  unique (user_id, group_id)
 );
 
 
@@ -73,3 +83,4 @@ alter table expense_splits enable row level security;
 alter table settlements    enable row level security;
 alter table device_tokens  enable row level security;
 alter table users          enable row level security;
+alter table user_favorites  enable row level security;
