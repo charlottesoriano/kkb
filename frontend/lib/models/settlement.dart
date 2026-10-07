@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:frontend/models/expense.dart';
-import 'package:frontend/models/user.dart';
+import 'package:KKB/models/user.dart';
 
 part 'generated/settlement.freezed.dart';
 part 'generated/settlement.g.dart';

@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:frontend/models/expense.dart';
-import 'package:frontend/models/user.dart';
+import 'package:KKB/models/expense.dart';
+import 'package:KKB/models/user.dart';
 
 part 'generated/group.freezed.dart';
 part 'generated/group.g.dart';

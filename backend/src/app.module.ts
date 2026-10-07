@@ -14,6 +14,7 @@ import { SupabaseModule } from './supabase/supabase.module.js';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module.js';
 import { UserFavoritesModule } from './user-favorites/user-favorites.module.js';
+import { ClerkWebhookController } from './webhooks/clerk-webhook.controller.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -33,7 +34,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     NotificationsModule,
     UsersModule,
     UserFavoritesModule],
-  controllers: [AppController],
+  controllers: [AppController, ClerkWebhookController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MColors {
-  MColors._();
+class KKBColors {
+  KKBColors._();
 
   // ───────────────────────── LIGHT ─────────────────────────
 

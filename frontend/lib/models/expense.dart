@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:frontend/models/user.dart';
+import 'package:KKB/models/user.dart';
 
 part 'generated/expense.freezed.dart';
 part 'generated/expense.g.dart';

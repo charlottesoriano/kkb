@@ -24,8 +24,8 @@ export class GroupsService {
   async findUserGroups(userId: string) {
     const { data, error } = await this.db
       .from('groups')
-      .select('*, members!inner(user_id)')
-      .eq('members.user_id', userId);
+      .select('*, members!inner(user_id, users!inner(id, email, display_name, first_name, last_name, image_url))')
+      .eq('members.users.id', userId);
     if (error) throw error;
     return data;
   }
@@ -33,7 +33,7 @@ export class GroupsService {
   async findGroupMembers(groupId: number) {
     const { data, error } = await this.db
       .from('members')
-      .select('user_id')
+      .select('*, users!inner(id, email, display_name, first_name, last_name, image_url)')
       .eq('group_id', groupId);
     if (error) throw error;
     return data;

@@ -1,5 +1,5 @@
-name: frontend
-description: "A new Flutter project."
+name: KKB
+description: "Kanya-kanyang bayad"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -37,6 +37,7 @@ dependencies:
   flutter_riverpod: ^3.4.3
   graphql_flutter: ^5.3.0
   clerk_flutter: ^0.0.18-beta
+  clerk_auth: ^0.0.18-beta
   firebase_core: ^4.15.0
   firebase_messaging: ^16.7.0
   flutter_dotenv: ^6.0.1
@@ -51,6 +52,9 @@ dependencies:
   riverpod_annotation: ^4.0.7
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
+  dotenv: ^4.2.0
+  flutter_svg: ^2.3.0
+  shared_preferences: ^2.5.6
 
 dev_dependencies:
   flutter_test:
@@ -75,8 +79,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - .env
+    - assets/images/
+    - assets/icons/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
