@@ -2,17 +2,16 @@ import 'package:KKB/components/groups/header.dart';
 import 'package:KKB/components/groups/join_create_group_panel.dart';
 import 'package:KKB/components/groups/favorite_groups.dart';
 import 'package:KKB/components/global/dashed_button.dart';
-import 'package:KKB/components/global/label.dart';
-import 'package:KKB/components/global/svg_icon.dart';
 import 'package:KKB/components/global/text_field.dart';
 import 'package:KKB/components/groups/user_groups.dart';
-import 'package:KKB/const/colors.dart';
-import 'package:KKB/const/icons.dart';
+import 'package:KKB/core/router.dart';
 import 'package:KKB/models/group.dart';
 import 'package:KKB/providers/auth/current_user.dart';
+import 'package:KKB/providers/groups/selected_group.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class GroupsIndex extends ConsumerStatefulWidget {
   const GroupsIndex({super.key});
@@ -22,6 +21,12 @@ class GroupsIndex extends ConsumerStatefulWidget {
 }
 
 class _MGroupsIndexState extends ConsumerState<GroupsIndex> {
+
+  // select the group and open the group navigation
+  void _openGroup(Group group) {
+    ref.read(selectedGroupProvider.notifier).setSelectedGroup(group);
+    context.go(AppRoutes.groupBalances);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +57,9 @@ class _MGroupsIndexState extends ConsumerState<GroupsIndex> {
                     },
                   ),
                   
-                  FavoriteGroupsList(groups: favoriteGroups),
-                  UserGroupsList(groups: createdByUserGroups, byUser: true),
-                  UserGroupsList(groups: joinedGroups, byUser: false),
+                  FavoriteGroupsList(groups: favoriteGroups, onTap: _openGroup),
+                  UserGroupsList(groups: createdByUserGroups, byUser: true, onTap: _openGroup),
+                  UserGroupsList(groups: joinedGroups, byUser: false, onTap: _openGroup),
                   
                   // const SizedBox(height: 16),
                   // KKBLabel(title: 'Joined groups', subtitle: 'Created by others • 3'),

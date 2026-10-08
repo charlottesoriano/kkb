@@ -14,11 +14,12 @@ export class ExpensesResolver {
 
   @Mutation(() => Expense)
   createExpense(@Args('createExpenseInput') createExpenseInput: CreateExpenseInput, @CurrentUser() userId: string) {
+    // scenario for the user id: the user may have been asked to create an expense paid by another member
     return this.expensesService.create(createExpenseInput, userId);
   }
 
   @Query(() => [Expense], { name: 'expenses' })
-  findAll(@Args('groupId', { type: () => String }) groupId: string) {
+  findAll(@Args('groupId', { type: () => Int }) groupId: number) {
     return this.expensesService.findAll(groupId);
   }
 

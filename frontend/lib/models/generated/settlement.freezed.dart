@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Settlement {
 
- int get id; int get group_id; User get fromUser; User get toUser; double get amount; String get status; DateTime get createdAt;
+ int get id; int get groupId; User get fromUser; User get toUser; double get amount; String get status; DateTime get createdAt;
 /// Create a copy of Settlement
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $SettlementCopyWith<Settlement> get copyWith => _$SettlementCopyWithImpl<Settlem
 @override
 bool operator ==(Object other) {
   final _this = this as Settlement;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Settlement&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.group_id, _this.group_id) || other.group_id == _this.group_id)&&(identical(other.fromUser, _this.fromUser) || other.fromUser == _this.fromUser)&&(identical(other.toUser, _this.toUser) || other.toUser == _this.toUser)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Settlement&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.groupId, _this.groupId) || other.groupId == _this.groupId)&&(identical(other.fromUser, _this.fromUser) || other.fromUser == _this.fromUser)&&(identical(other.toUser, _this.toUser) || other.toUser == _this.toUser)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Settlement;
-  return Object.hash(runtimeType,_this.id,_this.group_id,_this.fromUser,_this.toUser,_this.amount,_this.status,_this.createdAt);
+  return Object.hash(runtimeType,_this.id,_this.groupId,_this.fromUser,_this.toUser,_this.amount,_this.status,_this.createdAt);
 }
 
 @override
 String toString() {
   final _this = this as Settlement;
-  return 'Settlement(id: ${_this.id}, group_id: ${_this.group_id}, fromUser: ${_this.fromUser}, toUser: ${_this.toUser}, amount: ${_this.amount}, status: ${_this.status}, createdAt: ${_this.createdAt})';
+  return 'Settlement(id: ${_this.id}, groupId: ${_this.groupId}, fromUser: ${_this.fromUser}, toUser: ${_this.toUser}, amount: ${_this.amount}, status: ${_this.status}, createdAt: ${_this.createdAt})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $SettlementCopyWith<$Res>  {
   factory $SettlementCopyWith(Settlement value, $Res Function(Settlement) _then) = _$SettlementCopyWithImpl;
 @useResult
 $Res call({
- int id, int group_id, User fromUser, User toUser, double amount, String status, DateTime createdAt
+ int id, int groupId, User fromUser, User toUser, double amount, String status, DateTime createdAt
 });
 
 
@@ -71,10 +71,10 @@ class _$SettlementCopyWithImpl<$Res>
 
 /// Create a copy of Settlement
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? group_id = null,Object? fromUser = null,Object? toUser = null,Object? amount = null,Object? status = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? groupId = null,Object? fromUser = null,Object? toUser = null,Object? amount = null,Object? status = null,Object? createdAt = null,}) {
   return _then(Settlement(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,group_id: null == group_id ? _self.group_id : group_id // ignore: cast_nullable_to_non_nullable
+as int,groupId: null == groupId ? _self.groupId : groupId // ignore: cast_nullable_to_non_nullable
 as int,fromUser: null == fromUser ? _self.fromUser : fromUser // ignore: cast_nullable_to_non_nullable
 as User,toUser: null == toUser ? _self.toUser : toUser // ignore: cast_nullable_to_non_nullable
 as User,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
@@ -183,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int group_id,  User fromUser,  User toUser,  double amount,  String status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  int groupId,  User fromUser,  User toUser,  double amount,  String status,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Settlement() when $default != null:
-return $default(_that.id,_that.group_id,_that.fromUser,_that.toUser,_that.amount,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.groupId,_that.fromUser,_that.toUser,_that.amount,_that.status,_that.createdAt);case _:
   return orElse();
 
 }
@@ -204,10 +204,10 @@ return $default(_that.id,_that.group_id,_that.fromUser,_that.toUser,_that.amount
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int group_id,  User fromUser,  User toUser,  double amount,  String status,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  int groupId,  User fromUser,  User toUser,  double amount,  String status,  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _Settlement():
-return $default(_that.id,_that.group_id,_that.fromUser,_that.toUser,_that.amount,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.groupId,_that.fromUser,_that.toUser,_that.amount,_that.status,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -224,10 +224,10 @@ return $default(_that.id,_that.group_id,_that.fromUser,_that.toUser,_that.amount
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int group_id,  User fromUser,  User toUser,  double amount,  String status,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  int groupId,  User fromUser,  User toUser,  double amount,  String status,  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Settlement() when $default != null:
-return $default(_that.id,_that.group_id,_that.fromUser,_that.toUser,_that.amount,_that.status,_that.createdAt);case _:
+return $default(_that.id,_that.groupId,_that.fromUser,_that.toUser,_that.amount,_that.status,_that.createdAt);case _:
   return null;
 
 }
@@ -239,11 +239,11 @@ return $default(_that.id,_that.group_id,_that.fromUser,_that.toUser,_that.amount
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _Settlement implements Settlement {
-  const _Settlement({required this.id, required this.group_id, required this.fromUser, required this.toUser, required this.amount, this.status = "pending", required this.createdAt});
+  const _Settlement({required this.id, required this.groupId, required this.fromUser, required this.toUser, required this.amount, this.status = "pending", required this.createdAt});
   factory _Settlement.fromJson(Map<String, dynamic> json) => _$SettlementFromJson(json);
 
 @override final  int id;
-@override final  int group_id;
+@override final  int groupId;
 @override final  User fromUser;
 @override final  User toUser;
 @override final  double amount;
@@ -263,18 +263,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Settlement&&(identical(other.id, id) || other.id == id)&&(identical(other.group_id, group_id) || other.group_id == group_id)&&(identical(other.fromUser, fromUser) || other.fromUser == fromUser)&&(identical(other.toUser, toUser) || other.toUser == toUser)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Settlement&&(identical(other.id, id) || other.id == id)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.fromUser, fromUser) || other.fromUser == fromUser)&&(identical(other.toUser, toUser) || other.toUser == toUser)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,group_id,fromUser,toUser,amount,status,createdAt);
+    return Object.hash(runtimeType,id,groupId,fromUser,toUser,amount,status,createdAt);
 }
 
 @override
 String toString() {
-    return 'Settlement(id: $id, group_id: $group_id, fromUser: $fromUser, toUser: $toUser, amount: $amount, status: $status, createdAt: $createdAt)';
+    return 'Settlement(id: $id, groupId: $groupId, fromUser: $fromUser, toUser: $toUser, amount: $amount, status: $status, createdAt: $createdAt)';
 }
 
 
@@ -285,7 +285,7 @@ abstract mixin class _$SettlementCopyWith<$Res> implements $SettlementCopyWith<$
   factory _$SettlementCopyWith(_Settlement value, $Res Function(_Settlement) _then) = __$SettlementCopyWithImpl;
 @override @useResult
 $Res call({
- int id, int group_id, User fromUser, User toUser, double amount, String status, DateTime createdAt
+ int id, int groupId, User fromUser, User toUser, double amount, String status, DateTime createdAt
 });
 
 
@@ -302,10 +302,10 @@ class __$SettlementCopyWithImpl<$Res>
 
 /// Create a copy of Settlement
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? group_id = null,Object? fromUser = null,Object? toUser = null,Object? amount = null,Object? status = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? groupId = null,Object? fromUser = null,Object? toUser = null,Object? amount = null,Object? status = null,Object? createdAt = null,}) {
   return _then(_Settlement(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,group_id: null == group_id ? _self.group_id : group_id // ignore: cast_nullable_to_non_nullable
+as int,groupId: null == groupId ? _self.groupId : groupId // ignore: cast_nullable_to_non_nullable
 as int,fromUser: null == fromUser ? _self.fromUser : fromUser // ignore: cast_nullable_to_non_nullable
 as User,toUser: null == toUser ? _self.toUser : toUser // ignore: cast_nullable_to_non_nullable
 as User,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable

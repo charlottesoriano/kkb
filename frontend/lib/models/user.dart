@@ -12,7 +12,7 @@ abstract class User with _$User {
     required String displayName,
     required String firstName,
     required String lastName,
-    required String imageUrl,
+    @Default("") String imageUrl,
     @Default("") String createdAt,
   }) = _User;
 

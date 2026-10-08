@@ -17,4 +17,10 @@ export class BalancesService {
     if (error) throw error;
     return data; // 200
   }
+
+  //user's balance and money owed to them in a group
+  async userGroupBalance(groupId: number, userId: string) {
+    const rows = await this.groupBalances(groupId);
+    return rows.find((r: { user_id: string; balance: number }) => r.user_id === userId)?.balance ?? 0;
+  }
 }

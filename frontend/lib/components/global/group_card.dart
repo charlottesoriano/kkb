@@ -3,6 +3,7 @@ import 'package:KKB/const/colors.dart';
 import 'package:KKB/const/icons.dart';
 import 'package:KKB/models/group.dart';
 import 'package:KKB/models/user.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -126,7 +127,7 @@ class KKBGroupCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        _initials(group.name),
+        Helper.initials(group.name),
         style: KKBTextStyles.bodyMediumXBold.copyWith(color: onAvatarColor),
       ),
     );
@@ -183,7 +184,7 @@ class KKBGroupCard extends StatelessWidget {
             Positioned(
               left: i * step,
               child: _buildMemberCircle(
-                label: _initials('${visible[i].firstName} ${visible[i].lastName}'),
+                label: Helper.initials('${visible[i].firstName} ${visible[i].lastName}'),
                 colors: _avatarColors[i % _avatarColors.length],
               ),
             ),
@@ -213,15 +214,5 @@ class KKBGroupCard extends StatelessWidget {
       ),
       child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: colors.$2)),
     );
-  }
-
-  // "Casa Katipunan" -> "CK", "Boracay 2026" -> "BO"
-  String _initials(String name) {
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return '';
-    if (words.length == 1 || !RegExp(r'^[A-Za-z]').hasMatch(words[1])) {
-      return words.first.substring(0, words.first.length.clamp(0, 2)).toUpperCase();
-    }
-    return (words[0][0] + words[1][0]).toUpperCase();
   }
 }

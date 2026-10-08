@@ -8,7 +8,7 @@ part of '../settlement.dart';
 
 _Settlement _$SettlementFromJson(Map<String, dynamic> json) => _Settlement(
   id: (json['id'] as num).toInt(),
-  group_id: (json['group_id'] as num).toInt(),
+  groupId: (json['group_id'] as num).toInt(),
   fromUser: User.fromJson(json['from_user'] as Map<String, dynamic>),
   toUser: User.fromJson(json['to_user'] as Map<String, dynamic>),
   amount: (json['amount'] as num).toDouble(),
@@ -19,7 +19,7 @@ _Settlement _$SettlementFromJson(Map<String, dynamic> json) => _Settlement(
 Map<String, dynamic> _$SettlementToJson(_Settlement instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'group_id': instance.group_id,
+      'group_id': instance.groupId,
       'from_user': instance.fromUser,
       'to_user': instance.toUser,
       'amount': instance.amount,

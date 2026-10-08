@@ -4,6 +4,8 @@ import { UpdateSettlementInput } from './dto/update-settlement.input.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE } from '../supabase/supabase.provider.js';
 
+const SETTLEMENT_SELECT = 'id, group_id, from_user, to_user, amount, status, created_at';
+
 @Injectable()
 export class SettlementsService {
   constructor(
@@ -12,7 +14,9 @@ export class SettlementsService {
   async create(createSettlementInput: CreateSettlementInput) {
     const { data, error } = await this.db
       .from('settlements')
-      .insert(createSettlementInput);
+      .insert(createSettlementInput)
+      .select(SETTLEMENT_SELECT)
+      .single();
     if (error) throw error;
     return data;
   }
@@ -30,7 +34,9 @@ export class SettlementsService {
     const { data, error } = await this.db
       .from('settlements')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select(SETTLEMENT_SELECT)
+      .single();
     if (error) throw error;
     return data;
   }

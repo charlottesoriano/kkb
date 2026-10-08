@@ -46,6 +46,8 @@ class KKBTextField extends StatefulWidget {
     this.inputFormatters,
     this.textCapitalization,
     this.backgroundColor,
+    this.textAlign = TextAlign.start,
+    this.textStyle,
   });
 
   final TextEditingController? controller;
@@ -95,6 +97,12 @@ class KKBTextField extends StatefulWidget {
 
   /// Overrides the field fill (e.g. white search bar on a cream screen).
   final Color? backgroundColor;
+
+  /// e.g. TextAlign.end for amount inputs.
+  final TextAlign textAlign;
+
+  /// Overrides the typed text style (color still follows the theme).
+  final TextStyle? textStyle;
 
   @override
   State<KKBTextField> createState() => _KKBTextFieldState();
@@ -245,12 +253,13 @@ class _KKBTextFieldState extends State<KKBTextField> {
       onFieldSubmitted: widget.onSubmitted,
       onTap: widget.onTap,
       cursorColor: p.focus,
-      style: KKBTextStyles.bodyLarge.copyWith(
+      textAlign: widget.textAlign,
+      style: (widget.textStyle ?? KKBTextStyles.bodyLarge).copyWith(
         color: widget.enabled ? p.text : p.text.withValues(alpha: 0.6),
       ),
       decoration: InputDecoration(
         hintText: widget.hintText,
-        hintStyle: KKBTextStyles.bodyLarge.copyWith(color: p.placeholder),
+        hintStyle: (widget.textStyle ?? KKBTextStyles.bodyLarge).copyWith(color: p.placeholder),
         helperText: widget.helperText,
         helperStyle: KKBTextStyles.bodyXSmall.copyWith(color: p.placeholder),
         errorText: widget.errorText,

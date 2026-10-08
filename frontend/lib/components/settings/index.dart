@@ -4,6 +4,7 @@ import 'package:KKB/core/auth.dart';
 import 'package:KKB/providers/global/graphql_client.dart';
 import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
+import 'package:KKB/providers/settings/user_profile.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,73 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
   static const _appVersion = 'v1.0.0';
 
   bool _loggingOut = false;
+  bool _editing = false;
+  bool _saving = false;
+
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _displayNameController = TextEditingController();
+
+  // What we last saved, so the card updates right away (Clerk's user info won't reflect it until it refreshes)
+  ({String firstName, String lastName, String displayName})? _savedProfile;
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _displayNameController.dispose();
+    super.dispose();
+  }
+
+  // Keeps the (disabled) inputs showing the current values whenever we're not editing
+  void _syncControllers(String firstName, String lastName, String displayName) {
+    if (_editing) return;
+    if (_firstNameController.text != firstName) _firstNameController.text = firstName;
+    if (_lastNameController.text != lastName) _lastNameController.text = lastName;
+    if (_displayNameController.text != displayName) _displayNameController.text = displayName;
+  }
+
+  void _cancelEdit() {
+    FocusScope.of(context).unfocus();
+    // dropping _editing lets the next build reset the inputs back to the current values
+    setState(() => _editing = false);
+  }
+
+  Future<void> _saveProfile(String userId) async {
+    if (_saving) return;
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final typedDisplayName = _displayNameController.text.trim();
+    final displayName = typedDisplayName.isEmpty ? '$firstName $lastName'.trim() : typedDisplayName;
+
+    if (firstName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('First name is required')));
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _saving = true);
+    final response = await ref.read(userProfileSettingsProvider).updateUserProfile(
+      id: userId,
+      firstName: firstName,
+      lastName: lastName,
+      displayName: displayName,
+    );
+    if (!mounted) return;
+
+    if (response.status) {
+      setState(() {
+        _saving = false;
+        _editing = false;
+        _savedProfile = (firstName: firstName, lastName: lastName, displayName: displayName);
+      });
+      // our member record (and its display name) comes from here
+      ref.invalidate(userGroupsProvider);
+    } else {
+      setState(() => _saving = false);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.message ?? 'Could not update profile')));
+  }
 
   Future<void> _logout() async {
     if (_loggingOut) return;
@@ -57,7 +125,12 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
       ),
     );
     if (confirmed != true) return;
-    // TODO: call the delete account mutation, then log out
+    final response = await ref.read(userProfileSettingsProvider).deleteUserProfile();
+    if (response.status) {
+      _logout();
+    } else {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.message ?? 'Could not delete account')));
+    }
   }
 
   @override
@@ -77,14 +150,17 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
     final danger = isDark ? KKBColors.darkOwe : KKBColors.lightOwe;
 
     final String userId = userInfo['id'] ?? '';
-    final String firstName = userInfo['firstName'] ?? '';
-    final String lastName = userInfo['lastName'] ?? '';
     final String email = userInfo['email'] ?? '';
-    final displayName = '$firstName $lastName'.trim();
-    final initials = [firstName, lastName].where((name) => name.isNotEmpty).map((name) => name[0].toUpperCase()).join();
 
-    // Clerk doesn't give us created_at here, so borrow it from our own member record
+    // Clerk doesn't give us created_at / display name here, so borrow them from our own member record
     final me = groups.expand((group) => group.members).where((member) => member.id == userId).firstOrNull;
+
+    String pick(List<String?> values) => values.firstWhere((value) => value != null && value.isNotEmpty, orElse: () => '') ?? '';
+    final firstName = pick([_savedProfile?.firstName, me?.firstName, userInfo['firstName']]);
+    final lastName = pick([_savedProfile?.lastName, me?.lastName, userInfo['lastName']]);
+    final displayName = pick([_savedProfile?.displayName, me?.displayName, '$firstName $lastName'.trim()]);
+    final initials = [firstName, lastName].where((name) => name.isNotEmpty).map((name) => name[0].toUpperCase()).join();
+    _syncControllers(firstName, lastName, displayName);
     final memberSince = DateTime.tryParse(me?.createdAt ?? '');
     final subtitle = [
       '${groups.length} ${groups.length == 1 ? 'group' : 'groups'}',
@@ -97,19 +173,31 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
       border: Border.all(color: border),
     );
 
-    Widget infoRow(String label, String value) {
+    // label on the left, value on the right; the value is an input that only unlocks while editing
+    Widget profileRow(String label, TextEditingController controller, {TextInputAction action = TextInputAction.next}) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: EdgeInsets.symmetric(vertical: _editing ? 6 : 14),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: KKBTextStyles.bodyMedium.copyWith(color: textSecondary)),
             const SizedBox(width: 16),
-            Flexible(
-              child: Text(
-                value,
+            Expanded(
+              child: TextField(
+                controller: controller,
+                enabled: _editing && !_saving,
+                textAlign: TextAlign.right,
+                textInputAction: action,
+                textCapitalization: TextCapitalization.words,
+                cursorColor: primary,
                 style: KKBTextStyles.bodyMediumBold.copyWith(color: textPrimary),
-                overflow: TextOverflow.ellipsis,
+                decoration: InputDecoration(
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: _editing ? 8 : 0),
+                  border: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: border)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primary, width: 2)),
+                ),
               ),
             ),
           ],
@@ -192,28 +280,65 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                       ),
                       child: Column(
                         children: [
-                          infoRow('Display name', displayName),
+                          profileRow('First name', _firstNameController),
                           Divider(height: 1, color: border),
-                          infoRow('Email', email),
+                          profileRow('Last name', _lastNameController),
+                          Divider(height: 1, color: border),
+                          profileRow('Display name', _displayNameController, action: TextInputAction.done),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // TODO: open edit profile
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          foregroundColor: textPrimary,
-                          side: BorderSide(color: border),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    if (_editing)
+                      Row(
+                        spacing: 12,
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: _saving ? null : _cancelEdit,
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                foregroundColor: textPrimary,
+                                side: BorderSide(color: border),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              ),
+                              child: Text('Cancel', style: KKBTextStyles.buttonMedium),
+                            ),
+                          ),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: _saving ? null : () => _saveProfile(userId),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                backgroundColor: primary,
+                                foregroundColor: onPrimary,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              ),
+                              child: _saving
+                                  ? SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: CircularProgressIndicator(strokeWidth: 2, color: onPrimary),
+                                    )
+                                  : Text('Save', style: KKBTextStyles.buttonMedium),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () => setState(() => _editing = true),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            foregroundColor: textPrimary,
+                            side: BorderSide(color: border),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: Text('Edit profile', style: KKBTextStyles.buttonMedium),
                         ),
-                        child: Text('Edit profile', style: KKBTextStyles.buttonMedium),
                       ),
-                    ),
                   ],
                 ),
               ),

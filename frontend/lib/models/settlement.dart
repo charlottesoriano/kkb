@@ -9,7 +9,7 @@ abstract class Settlement with _$Settlement {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Settlement({
     required int id,
-    required int group_id,
+    required int groupId,
     required User fromUser,
     required User toUser,
     required double amount,

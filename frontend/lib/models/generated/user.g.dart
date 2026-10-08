@@ -12,7 +12,7 @@ _User _$UserFromJson(Map<String, dynamic> json) => _User(
   displayName: json['display_name'] as String,
   firstName: json['first_name'] as String,
   lastName: json['last_name'] as String,
-  imageUrl: json['image_url'] as String,
+  imageUrl: json['image_url'] as String? ?? "",
   createdAt: json['created_at'] as String? ?? "",
 );
 

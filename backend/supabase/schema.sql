@@ -14,6 +14,7 @@ create table groups (
   code        text not null unique,
   name        text not null,
   description text not null,
+  avatar_color text not null default '#984063',
   created_by  text not null,                 -- Clerk user id
   created_at  timestamptz not null default now()
 );
@@ -32,7 +33,7 @@ create table expenses (
   description  text not null,
   amount       numeric(12, 2) not null check (amount > 0),
   paid_by      text not null references users(id),
-  created_at   timestamptz not null default now()
+  created_at   timestamptz not null default now(),
   updated_at   timestamptz
 );
 

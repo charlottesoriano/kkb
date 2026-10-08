@@ -1,59 +1,54 @@
+import 'package:KKB/components/expenses/add_expense_shared.dart';
+import 'package:KKB/components/expenses/custom_split.dart';
+import 'package:KKB/components/expenses/equal_split.dart';
+import 'package:KKB/components/expenses/expense_details_card.dart';
+import 'package:KKB/components/expenses/split_type_toggle.dart';
+import 'package:KKB/components/expenses/who_paid.dart';
 import 'package:KKB/components/global/group_header.dart';
-import 'package:KKB/components/global/text_field.dart';
 import 'package:KKB/components/global/title.dart';
 import 'package:KKB/const/colors.dart';
+import 'package:KKB/models/expense_input.dart';
 import 'package:KKB/models/group.dart';
+import 'package:KKB/models/response_status.dart';
+import 'package:KKB/models/settlement_input.dart';
 import 'package:KKB/models/user.dart';
 import 'package:KKB/providers/auth/current_user.dart';
+import 'package:KKB/providers/expenses/expenses.dart';
+import 'package:KKB/providers/groups/selected_group.dart';
+import 'package:KKB/core/router.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
-enum SplitType { equal, custom }
-
-class AddExpensesWidget extends ConsumerStatefulWidget {
-  const AddExpensesWidget({super.key, required this.group});
-
-  final Group group;
+class AddExpensesIndex extends ConsumerStatefulWidget {
+  const AddExpensesIndex({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _AddExpensesWidgetState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _AddExpensesIndexState();
 }
 
-class _AddExpensesWidgetState extends ConsumerState<AddExpensesWidget> {
-  static const _avatarColors = [
-    (KKBColors.lightAvatar1, KKBColors.lightOnAvatar1),
-    (KKBColors.lightAvatar2, KKBColors.lightOnAvatar2),
-    (KKBColors.lightAvatar3, KKBColors.lightOnAvatar3),
-    (KKBColors.lightAvatar4, KKBColors.lightOnAvatar4),
-  ];
-
-  static final _currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
-
-  // digits with at most 2 decimals, e.g. "3600" or "3600.50"
-  static final _amountFormatter = FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}'));
-
+class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   final _descriptionController = TextEditingController();
   final _amountController = TextEditingController();
 
   // one input per member for the custom amounts form
   late final Map<String, TextEditingController> _customControllers = {
-    for (final member in widget.group.members) member.id: TextEditingController(),
+    for (final member in mounted ? ref.read(selectedGroupProvider)?.members ?? [] : []) member.id: TextEditingController(),
   };
 
   SplitType _splitType = SplitType.equal;
   String? _paidById;
+  // blocks double taps while the expense is being saved
+  bool _submitting = false;
 
-  // members ticked in "Split between" (the payer is always left out, see _splitMembers)
-  late final Set<String> _selectedIds = widget.group.members.map((m) => m.id).toSet();
+  // members ticked in "Split between" (the payer included)
+  late final Set<String> _selectedIds = mounted ? ref.read(selectedGroupProvider)?.members.map((m) => m.id).toSet() ?? {} : {};
 
-  List<User> get _members => widget.group.members;
+  List<User> get _members => mounted ? ref.read(selectedGroupProvider)?.members.toList() ?? [] : [];
 
-  // everyone who shares the bill = ticked members minus whoever paid
-  List<User> get _splitMembers =>
-      _members.where((m) => m.id != _paidById && _selectedIds.contains(m.id)).toList();
+  // everyone who shares the bill = ticked members, the payer included
+  List<User> get _splitMembers => _members.where((m) => _selectedIds.contains(m.id)).toList();
 
   double get _amount => double.tryParse(_amountController.text) ?? 0;
 
@@ -92,25 +87,60 @@ class _AddExpensesWidgetState extends ConsumerState<AddExpensesWidget> {
     super.dispose();
   }
 
-  void _submit() {
-    // member id -> how much they owe the payer
+  Future<void> _submit() async {
+    final group = ref.read(selectedGroupProvider);
+    final paidById = _paidById;
+    if (group == null || paidById == null) return;
+
+    // member id -> their share of the bill (the payer's own share included)
     final shares = {
       for (final m in _splitMembers)
         m.id: _splitType == SplitType.equal
             ? _equalShare
             : double.tryParse(_customControllers[m.id]!.text) ?? 0,
     };
-    // TODO: send to the create expense mutation
-    debugPrint('---> add expense: ${_descriptionController.text} $_amount paid by $_paidById -> $shares');
+
+    // everyone except the payer owes the payer their share
+    final settlements = [
+      for (final MapEntry(key: memberId, value: share) in shares.entries)
+        if (memberId != paidById && share > 0)
+          SettlementInput(fromUser: memberId, toUser: paidById, amount: double.parse(share.toStringAsFixed(2))),
+    ];
+
+    final expenseInput = ExpenseInput(
+      groupId: group.id,
+      paidBy: paidById,
+      description: _descriptionController.text.trim(),
+      amount: _amount,
+      settlements: settlements,
+    );
+
+    setState(() => _submitting = true);
+    ResponseStatus result = await ref.read(groupExpensesProvider.notifier).createExpense(expenseInput);
+    if (mounted) setState(() => _submitting = false);
+
+    if (result.status) {
+      if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Expense added successfully'), backgroundColor: KKBColors.lightTextSuccess));
+      if (mounted && context.mounted) context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses);
+    } else {
+      if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final userId = ref.watch(currentUserProvider)?.id;
+    Group? group = ref.watch(selectedGroupProvider);
 
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
-      appBar: KKBGroupHeader(group: widget.group),
+      //to-do
+      appBar: group != null
+          ? KKBGroupHeader(
+              group: group,
+              onTapGroup: () => context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses),
+            )
+          : null,
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: Column(
@@ -118,20 +148,47 @@ class _AddExpensesWidgetState extends ConsumerState<AddExpensesWidget> {
           children: [
             const KKBTitle(title: 'Add expense'),
             const SizedBox(height: 16),
-            _buildDetailsCard(),
+            ExpenseDetailsCard(
+              descriptionController: _descriptionController,
+              amountController: _amountController,
+              onChanged: () => setState(() {}),
+            ),
             const SizedBox(height: 20),
 
-            _sectionLabel('Who paid?'),
+            const ExpenseSectionLabel('Who paid?'),
             const SizedBox(height: 10),
-            _buildWhoPaid(userId),
+            WhoPaid(
+              members: _members,
+              paidById: _paidById,
+              userId: userId,
+              onSelect: (id) => setState(() => _paidById = id),
+            ),
             const SizedBox(height: 20),
 
-            _sectionLabel('Split type'),
+            const ExpenseSectionLabel('Split type'),
             const SizedBox(height: 10),
-            _buildSplitTypeToggle(),
+            SplitTypeToggle(
+              value: _splitType,
+              onChanged: (type) => setState(() => _splitType = type),
+            ),
             const SizedBox(height: 20),
 
-            if (_splitType == SplitType.equal) _buildEqualSplit() else _buildCustomSplit(),
+            if (_splitType == SplitType.equal)
+              EqualSplit(
+                members: _members,
+                selectedIds: _selectedIds,
+                equalShare: _equalShare,
+                onToggle: (id) => setState(() => _selectedIds.contains(id) ? _selectedIds.remove(id) : _selectedIds.add(id)),
+              )
+            else
+              CustomSplit(
+                // only the members ticked in "Split between", so the inputs match what gets submitted
+                members: _splitMembers,
+                controllers: _customControllers,
+                amount: _amount,
+                assigned: _customTotal,
+                onChanged: () => setState(() {}),
+              ),
           ],
         ),
       ),
@@ -158,7 +215,7 @@ class _AddExpensesWidgetState extends ConsumerState<AddExpensesWidget> {
                 width: double.infinity,
                 height: 56,
                 child: FilledButton(
-                  onPressed: _canSubmit ? _submit : null,
+                  onPressed: _canSubmit && !_submitting ? _submit : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: KKBColors.lightPrimary,
                     foregroundColor: KKBColors.lightOnPrimary,
@@ -167,7 +224,7 @@ class _AddExpensesWidgetState extends ConsumerState<AddExpensesWidget> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: Text(
-                    'Add expense · ${_currency.format(_amount)}',
+                    'Add expense · ${expenseCurrency.format(_amount)}',
                     style: KKBTextStyles.buttonLarge,
                   ),
                 ),
@@ -177,339 +234,5 @@ class _AddExpensesWidgetState extends ConsumerState<AddExpensesWidget> {
         ),
       ),
     );
-  }
-
-  Widget _buildDetailsCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(radius: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          KKBTextField(
-            label: 'Description',
-            hintText: 'e.g. Drinks at Station 2',
-            controller: _descriptionController,
-            backgroundColor: KKBColors.lightBackground,
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 16),
-          Text('Amount', style: KKBTextStyles.bodySmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('₱', style: KKBTextStyles.displaySmall.copyWith(color: KKBColors.lightTextSecondary)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [_amountFormatter],
-                  cursorColor: KKBColors.lightPrimary,
-                  style: KKBTextStyles.displayXLarge.copyWith(color: KKBColors.lightTextPrimary),
-                  decoration: InputDecoration(
-                    hintText: '0.00',
-                    hintStyle: KKBTextStyles.displayXLarge.copyWith(color: KKBColors.lightBorder),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onChanged: (_) => setState(() {}),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWhoPaid(String? userId) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        spacing: 16,
-        children: [
-          for (final member in _members)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => setState(() => _paidById = member.id),
-              child: SizedBox(
-                width: 64,
-                child: Column(
-                  spacing: 6,
-                  children: [
-                    _buildMemberAvatar(member, size: 52, selected: member.id == _paidById),
-                    Text(
-                      member.id == userId ? '${member.firstName} (you)' : member.firstName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: (member.id == _paidById ? KKBTextStyles.bodySmallBold : KKBTextStyles.bodySmall)
-                          .copyWith(color: KKBColors.lightTextPrimary),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSplitTypeToggle() {
-    Widget option(SplitType type, String label) {
-      final selected = _splitType == type;
-      return Expanded(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => setState(() => _splitType = type),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            height: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: selected ? KKBColors.lightPrimary : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              label,
-              style: (selected ? KKBTextStyles.bodyMediumBold : KKBTextStyles.bodyMedium).copyWith(
-                color: selected ? KKBColors.lightOnPrimary : KKBColors.lightTextPrimary,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: KKBColors.lightSurfaceVariant,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          option(SplitType.equal, 'Equal'),
-          option(SplitType.custom, 'Custom amounts'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEqualSplit() {
-    final others = _members.where((m) => m.id != _paidById).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _sectionLabel('Split between'),
-            Text(
-              '${_currency.format(_equalShare)} each',
-              style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          decoration: _cardDecoration(),
-          child: others.isEmpty
-              ? Text(
-                  'No other members to split with.',
-                  textAlign: TextAlign.center,
-                  style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary),
-                )
-              : Wrap(
-                  alignment: WrapAlignment.spaceAround,
-                  spacing: 8,
-                  runSpacing: 16,
-                  children: [
-                    for (final member in others) _buildSplitMember(member),
-                  ],
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSplitMember(User member) {
-    final selected = _selectedIds.contains(member.id);
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => selected ? _selectedIds.remove(member.id) : _selectedIds.add(member.id)),
-      child: SizedBox(
-        width: 72,
-        child: Column(
-          spacing: 6,
-          children: [
-            Opacity(
-              opacity: selected ? 1 : 0.4,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _buildMemberAvatar(member, size: 40),
-                  if (selected)
-                    Positioned(
-                      right: -4,
-                      bottom: -4,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: KKBColors.lightPrimary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: KKBColors.lightSurface, width: 2),
-                        ),
-                        child: const Icon(Icons.check_rounded, size: 12, color: KKBColors.lightOnPrimary),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Text(
-              selected ? _currency.format(_equalShare) : '—',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightTextPrimary),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomSplit() {
-    final others = _members.where((m) => m.id != _paidById).toList();
-    final remaining = _amount - _customTotal;
-    final balanced = remaining.abs() < 0.01;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _sectionLabel('Custom amounts'),
-            Text(
-              balanced
-                  ? 'All assigned'
-                  : remaining > 0
-                      ? '${_currency.format(remaining)} left'
-                      : '${_currency.format(remaining.abs())} over',
-              style: KKBTextStyles.bodyXSmallBold.copyWith(
-                color: balanced ? KKBColors.lightTextSuccess : KKBColors.lightTextError,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: _cardDecoration(),
-          child: others.isEmpty
-              ? Text(
-                  'No other members to split with.',
-                  textAlign: TextAlign.center,
-                  style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary),
-                )
-              : Column(
-                  spacing: 12,
-                  children: [
-                    for (final member in others)
-                      Row(
-                        spacing: 12,
-                        children: [
-                          _buildMemberAvatar(member, size: 36),
-                          Expanded(
-                            child: Text(
-                              '${member.firstName} ${member.lastName}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: KKBTextStyles.bodyMediumSemiBold.copyWith(color: KKBColors.lightTextPrimary),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 120,
-                            child: KKBTextField(
-                              type: KKBInputType.number,
-                              hintText: '0.00',
-                              controller: _customControllers[member.id],
-                              inputFormatters: [_amountFormatter],
-                              backgroundColor: KKBColors.lightBackground,
-                              prefixIcon: Text(
-                                '₱',
-                                style: KKBTextStyles.bodyLargeBold.copyWith(color: KKBColors.lightTextSecondary),
-                              ),
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMemberAvatar(User member, {required double size, bool selected = false}) {
-    final index = _members.indexWhere((m) => m.id == member.id);
-    final (avatarColor, onAvatarColor) = _avatarColors[index % _avatarColors.length];
-
-    final circle = Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: avatarColor, shape: BoxShape.circle),
-      child: Text(
-        _initials('${member.firstName} ${member.lastName}'),
-        style: (size >= 48 ? KKBTextStyles.bodyMediumXBold : KKBTextStyles.bodyXSmallBold)
-            .copyWith(color: onAvatarColor),
-      ),
-    );
-
-    if (!selected) return circle;
-
-    // payer ring: avatar -> white gap -> primary ring
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: KKBColors.lightPrimary, width: 2),
-      ),
-      child: circle,
-    );
-  }
-
-  Widget _sectionLabel(String text) {
-    return Text(text, style: KKBTextStyles.bodySmallSemiBold.copyWith(color: KKBColors.lightTextPrimary));
-  }
-
-  BoxDecoration _cardDecoration({double radius = 20}) {
-    return BoxDecoration(
-      color: KKBColors.lightSurface,
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: KKBColors.lightBorder),
-    );
-  }
-
-  // "Maya Santos" -> "MS"
-  String _initials(String name) {
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return '';
-    if (words.length == 1 || !RegExp(r'^[A-Za-z]').hasMatch(words[1])) {
-      return words.first.substring(0, words.first.length.clamp(0, 2)).toUpperCase();
-    }
-    return (words[0][0] + words[1][0]).toUpperCase();
   }
 }

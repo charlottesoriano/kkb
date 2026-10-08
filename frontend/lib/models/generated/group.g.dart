@@ -8,6 +8,7 @@ part of '../group.dart';
 
 _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
   id: (json['id'] as num).toInt(),
+  code: json['code'] as String,
   name: json['name'] as String,
   createdBy: json['created_by'] == null
       ? null
@@ -25,10 +26,12 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
       const [],
   isFavorite: json['is_favorite'] as bool? ?? false,
   createdAt: json['created_at'] as String? ?? "",
+  avatarColor: json['avatar_color'] as String? ?? "#984063",
 );
 
 Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
   'id': instance.id,
+  'code': instance.code,
   'name': instance.name,
   'created_by': instance.createdBy,
   'description': instance.description,
@@ -36,4 +39,5 @@ Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
   'expenses': instance.expenses,
   'is_favorite': instance.isFavorite,
   'created_at': instance.createdAt,
+  'avatar_color': instance.avatarColor,
 };

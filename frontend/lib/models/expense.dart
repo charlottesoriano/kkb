@@ -10,6 +10,7 @@ abstract class Expense with _$Expense {
   const factory Expense({
     required int id,
     required User paidBy,
+    required int groupId,
     @Default("") String description,
     @Default(0) double amount,
     @Default("") String createdAt,

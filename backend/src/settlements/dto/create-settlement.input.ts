@@ -1,7 +1,9 @@
-import { InputType, Field, Float } from '@nestjs/graphql';
+import { InputType, Field, Float, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreateSettlementInput {
+  @Field(() => Int, { description: 'Group the settlement belongs to' })
+  group_id: number;
   @Field(() => String, { description: 'From user ID' })
   from_user: string;
   @Field(() => String, { description: 'To user ID' })

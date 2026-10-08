@@ -9,6 +9,7 @@ abstract class Balance with _$Balance {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Balance({
     required User user,
+    required int groupId,
     required double amount,
   }) = _Balance;
 

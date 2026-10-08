@@ -5,6 +5,8 @@ import { User } from '../../users/entities/user.entity.js';
 export class Group {
   @Field(() => Int, { description: 'Group ID' })
   id: number;
+  @Field(() => String, { description: 'Group code' })
+  code: string;
   @Field(() => String, { description: 'Group name' })
   name: string;
   @Field(() => String, { description: 'Group description' })
@@ -17,4 +19,6 @@ export class Group {
   is_favorite?: boolean;
   @Field(() => [User], { nullable: true, description: 'Group members' })
   members?: User[];
+  @Field(() => String, { defaultValue: '#984063', description: 'Group avatar color' })
+  avatar_color: string;
 }

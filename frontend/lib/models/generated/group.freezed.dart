@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Group {
 
- int get id; String get name; User? get createdBy; String get description; List<User> get members; List<Expense> get expenses; bool get isFavorite; String get createdAt;
+ int get id; String get code; String get name; User? get createdBy; String get description; List<User> get members; List<Expense> get expenses; bool get isFavorite; String get createdAt; String get avatarColor;
 /// Create a copy of Group
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $GroupCopyWith<Group> get copyWith => _$GroupCopyWithImpl<Group>(this as Group, 
 @override
 bool operator ==(Object other) {
   final _this = this as Group;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Group&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.createdBy, _this.createdBy) || other.createdBy == _this.createdBy)&&(identical(other.description, _this.description) || other.description == _this.description)&&const DeepCollectionEquality().equals(other.members, _this.members)&&const DeepCollectionEquality().equals(other.expenses, _this.expenses)&&(identical(other.isFavorite, _this.isFavorite) || other.isFavorite == _this.isFavorite)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Group&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.createdBy, _this.createdBy) || other.createdBy == _this.createdBy)&&(identical(other.description, _this.description) || other.description == _this.description)&&const DeepCollectionEquality().equals(other.members, _this.members)&&const DeepCollectionEquality().equals(other.expenses, _this.expenses)&&(identical(other.isFavorite, _this.isFavorite) || other.isFavorite == _this.isFavorite)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.avatarColor, _this.avatarColor) || other.avatarColor == _this.avatarColor));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Group;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.createdBy,_this.description,const DeepCollectionEquality().hash(_this.members),const DeepCollectionEquality().hash(_this.expenses),_this.isFavorite,_this.createdAt);
+  return Object.hash(runtimeType,_this.id,_this.code,_this.name,_this.createdBy,_this.description,const DeepCollectionEquality().hash(_this.members),const DeepCollectionEquality().hash(_this.expenses),_this.isFavorite,_this.createdAt,_this.avatarColor);
 }
 
 @override
 String toString() {
   final _this = this as Group;
-  return 'Group(id: ${_this.id}, name: ${_this.name}, createdBy: ${_this.createdBy}, description: ${_this.description}, members: ${_this.members}, expenses: ${_this.expenses}, isFavorite: ${_this.isFavorite}, createdAt: ${_this.createdAt})';
+  return 'Group(id: ${_this.id}, code: ${_this.code}, name: ${_this.name}, createdBy: ${_this.createdBy}, description: ${_this.description}, members: ${_this.members}, expenses: ${_this.expenses}, isFavorite: ${_this.isFavorite}, createdAt: ${_this.createdAt}, avatarColor: ${_this.avatarColor})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $GroupCopyWith<$Res>  {
   factory $GroupCopyWith(Group value, $Res Function(Group) _then) = _$GroupCopyWithImpl;
 @useResult
 $Res call({
- int id, String name, User? createdBy, String description, List<User> members, List<Expense> expenses, bool isFavorite, String createdAt
+ int id, String code, String name, User? createdBy, String description, List<User> members, List<Expense> expenses, bool isFavorite, String createdAt, String avatarColor
 });
 
 
@@ -71,16 +71,18 @@ class _$GroupCopyWithImpl<$Res>
 
 /// Create a copy of Group
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? createdBy = freezed,Object? description = null,Object? members = null,Object? expenses = null,Object? isFavorite = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? code = null,Object? name = null,Object? createdBy = freezed,Object? description = null,Object? members = null,Object? expenses = null,Object? isFavorite = null,Object? createdAt = null,Object? avatarColor = null,}) {
   return _then(Group(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as int,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
 as User?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,members: null == members ? _self.members : members // ignore: cast_nullable_to_non_nullable
 as List<User>,expenses: null == expenses ? _self.expenses : expenses // ignore: cast_nullable_to_non_nullable
 as List<Expense>,isFavorite: null == isFavorite ? _self.isFavorite : isFavorite // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,avatarColor: null == avatarColor ? _self.avatarColor : avatarColor // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -178,10 +180,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String name,  User? createdBy,  String description,  List<User> members,  List<Expense> expenses,  bool isFavorite,  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String code,  String name,  User? createdBy,  String description,  List<User> members,  List<Expense> expenses,  bool isFavorite,  String createdAt,  String avatarColor)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Group() when $default != null:
-return $default(_that.id,_that.name,_that.createdBy,_that.description,_that.members,_that.expenses,_that.isFavorite,_that.createdAt);case _:
+return $default(_that.id,_that.code,_that.name,_that.createdBy,_that.description,_that.members,_that.expenses,_that.isFavorite,_that.createdAt,_that.avatarColor);case _:
   return orElse();
 
 }
@@ -199,10 +201,10 @@ return $default(_that.id,_that.name,_that.createdBy,_that.description,_that.memb
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String name,  User? createdBy,  String description,  List<User> members,  List<Expense> expenses,  bool isFavorite,  String createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String code,  String name,  User? createdBy,  String description,  List<User> members,  List<Expense> expenses,  bool isFavorite,  String createdAt,  String avatarColor)  $default,) {final _that = this;
 switch (_that) {
 case _Group():
-return $default(_that.id,_that.name,_that.createdBy,_that.description,_that.members,_that.expenses,_that.isFavorite,_that.createdAt);case _:
+return $default(_that.id,_that.code,_that.name,_that.createdBy,_that.description,_that.members,_that.expenses,_that.isFavorite,_that.createdAt,_that.avatarColor);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -219,10 +221,10 @@ return $default(_that.id,_that.name,_that.createdBy,_that.description,_that.memb
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String name,  User? createdBy,  String description,  List<User> members,  List<Expense> expenses,  bool isFavorite,  String createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String code,  String name,  User? createdBy,  String description,  List<User> members,  List<Expense> expenses,  bool isFavorite,  String createdAt,  String avatarColor)?  $default,) {final _that = this;
 switch (_that) {
 case _Group() when $default != null:
-return $default(_that.id,_that.name,_that.createdBy,_that.description,_that.members,_that.expenses,_that.isFavorite,_that.createdAt);case _:
+return $default(_that.id,_that.code,_that.name,_that.createdBy,_that.description,_that.members,_that.expenses,_that.isFavorite,_that.createdAt,_that.avatarColor);case _:
   return null;
 
 }
@@ -234,10 +236,11 @@ return $default(_that.id,_that.name,_that.createdBy,_that.description,_that.memb
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _Group implements Group {
-  const _Group({required this.id, required this.name, this.createdBy = null, this.description = "",  List<User> members = const [],  List<Expense> expenses = const [], this.isFavorite = false, this.createdAt = ""}): _members = members,_expenses = expenses;
+  const _Group({required this.id, required this.code, required this.name, this.createdBy = null, this.description = "",  List<User> members = const [],  List<Expense> expenses = const [], this.isFavorite = false, this.createdAt = "", this.avatarColor = "#984063"}): _members = members,_expenses = expenses;
   factory _Group.fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
 
 @override final  int id;
+@override final  String code;
 @override final  String name;
 @override@JsonKey() final  User? createdBy;
 @override@JsonKey() final  String description;
@@ -257,6 +260,7 @@ class _Group implements Group {
 
 @override@JsonKey() final  bool isFavorite;
 @override@JsonKey() final  String createdAt;
+@override@JsonKey() final  String avatarColor;
 
 /// Create a copy of Group
 /// with the given fields replaced by the non-null parameter values.
@@ -271,18 +275,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Group&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.members, _members)&&const DeepCollectionEquality().equals(other.expenses, _expenses)&&(identical(other.isFavorite, isFavorite) || other.isFavorite == isFavorite)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Group&&(identical(other.id, id) || other.id == id)&&(identical(other.code, code) || other.code == code)&&(identical(other.name, name) || other.name == name)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.members, _members)&&const DeepCollectionEquality().equals(other.expenses, _expenses)&&(identical(other.isFavorite, isFavorite) || other.isFavorite == isFavorite)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.avatarColor, avatarColor) || other.avatarColor == avatarColor));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,createdBy,description,const DeepCollectionEquality().hash(_members),const DeepCollectionEquality().hash(_expenses),isFavorite,createdAt);
+    return Object.hash(runtimeType,id,code,name,createdBy,description,const DeepCollectionEquality().hash(_members),const DeepCollectionEquality().hash(_expenses),isFavorite,createdAt,avatarColor);
 }
 
 @override
 String toString() {
-    return 'Group(id: $id, name: $name, createdBy: $createdBy, description: $description, members: $members, expenses: $expenses, isFavorite: $isFavorite, createdAt: $createdAt)';
+    return 'Group(id: $id, code: $code, name: $name, createdBy: $createdBy, description: $description, members: $members, expenses: $expenses, isFavorite: $isFavorite, createdAt: $createdAt, avatarColor: $avatarColor)';
 }
 
 
@@ -293,7 +297,7 @@ abstract mixin class _$GroupCopyWith<$Res> implements $GroupCopyWith<$Res> {
   factory _$GroupCopyWith(_Group value, $Res Function(_Group) _then) = __$GroupCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String name, User? createdBy, String description, List<User> members, List<Expense> expenses, bool isFavorite, String createdAt
+ int id, String code, String name, User? createdBy, String description, List<User> members, List<Expense> expenses, bool isFavorite, String createdAt, String avatarColor
 });
 
 
@@ -310,16 +314,18 @@ class __$GroupCopyWithImpl<$Res>
 
 /// Create a copy of Group
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? createdBy = freezed,Object? description = null,Object? members = null,Object? expenses = null,Object? isFavorite = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? code = null,Object? name = null,Object? createdBy = freezed,Object? description = null,Object? members = null,Object? expenses = null,Object? isFavorite = null,Object? createdAt = null,Object? avatarColor = null,}) {
   return _then(_Group(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as int,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as int,code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
 as User?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,members: null == members ? _self._members : members // ignore: cast_nullable_to_non_nullable
 as List<User>,expenses: null == expenses ? _self._expenses : expenses // ignore: cast_nullable_to_non_nullable
 as List<Expense>,isFavorite: null == isFavorite ? _self.isFavorite : isFavorite // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,avatarColor: null == avatarColor ? _self.avatarColor : avatarColor // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

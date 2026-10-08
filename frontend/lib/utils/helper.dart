@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:KKB/models/response_status.dart';
 import 'package:flutter/foundation.dart';
@@ -46,5 +47,18 @@ class Helper {
     }
     if (link != null) return describe(link);
     return 'Network error. Is the backend/ngrok running?';
+  }
+
+  static Color colorFromHex(String hex) {
+    return Color(int.parse(hex.replaceAll('#', '0xFF')));
+  }
+
+  static String initials(String name) {
+    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return '';
+    if (words.length == 1 || !RegExp(r'^[A-Za-z]').hasMatch(words[1])) {
+      return words.first.substring(0, words.first.length.clamp(0, 2)).toUpperCase();
+    }
+    return (words[0][0] + words[1][0]).toUpperCase();
   }
 }

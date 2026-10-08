@@ -6,6 +6,7 @@ import 'package:KKB/const/colors.dart';
 import 'package:KKB/const/icons.dart';
 import 'package:KKB/models/group.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,16 +41,6 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
   ];
 
   final _currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
-
-  // same rule as KKBGroupCard so a group's avatar matches in both lists: "Boracay 2026" -> "BO"
-  String _initials(String name) {
-    final words = name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return '';
-    if (words.length == 1 || !RegExp(r'^[A-Za-z]').hasMatch(words[1])) {
-      return words.first.substring(0, words.first.length.clamp(0, 2)).toUpperCase();
-    }
-    return (words[0][0] + words[1][0]).toUpperCase();
-  }
 
   //the provider flips the flag optimistically and rolls back on failure
   Future<void> _toggleFavorite(Group group) async {
@@ -125,7 +116,7 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        _initials(group.name),
+        Helper.initials(group.name),
         style: KKBTextStyles.bodyMediumXBold.copyWith(color: onAvatarColor),
       ),
     );

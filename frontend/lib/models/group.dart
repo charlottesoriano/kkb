@@ -10,6 +10,7 @@ abstract class Group with _$Group {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory Group({
     required int id,
+    required String code,
     required String name,
     @Default(null) User? createdBy,
     @Default("") String description,
@@ -17,6 +18,7 @@ abstract class Group with _$Group {
     @Default([]) List<Expense> expenses,
     @Default(false) bool isFavorite,
     @Default("") String createdAt,
+    @Default("#984063") String avatarColor,
   }) = _Group;
 
   factory Group.fromJson(Map<String, Object?> json) => _$GroupFromJson(json);

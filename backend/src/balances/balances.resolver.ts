@@ -21,4 +21,6 @@ export class BalancesResolver {
   async totalBalance(@CurrentUser() userId: string) {
     return this.balancesService.totalBalance(userId);
   }
+
+  
 }

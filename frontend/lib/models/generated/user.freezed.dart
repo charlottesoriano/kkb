@@ -221,7 +221,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.las
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _User implements User {
-  const _User({required this.id, required this.email, required this.displayName, required this.firstName, required this.lastName, required this.imageUrl, this.createdAt = ""});
+  const _User({required this.id, required this.email, required this.displayName, required this.firstName, required this.lastName, this.imageUrl = "", this.createdAt = ""});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -229,7 +229,7 @@ class _User implements User {
 @override final  String displayName;
 @override final  String firstName;
 @override final  String lastName;
-@override final  String imageUrl;
+@override@JsonKey() final  String imageUrl;
 @override@JsonKey() final  String createdAt;
 
 /// Create a copy of User
