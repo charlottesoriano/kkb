@@ -33,7 +33,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
     final result = await ref.read(authServiceProvider).authGoogleSignIn(context);
     if (!mounted) return;
     if (result.status) {
-      GoRouter.of(context).go(AppRoutes.balances);
+      GoRouter.of(context).go(AppRoutes.groups);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred')));
     }

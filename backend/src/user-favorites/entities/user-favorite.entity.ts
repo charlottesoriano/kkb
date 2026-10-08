@@ -6,6 +6,6 @@ export class UserFavorite {
   user_id: string;
   @Field(() => Int, { description: 'Group ID' })
   group_id: number;
-  @Field(() => Date, { description: 'Created at' })
-  created_at: Date;
+  @Field(() => String, { description: 'Created at' })
+  created_at: string;
 }

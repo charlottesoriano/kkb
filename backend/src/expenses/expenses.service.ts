@@ -42,7 +42,10 @@ export class ExpensesService {
   async update(id: number, updateExpenseInput: UpdateExpenseInput) {
     const { data, error } = await this.db
       .from('expenses')
-      .update(updateExpenseInput)
+      .update({
+        ...updateExpenseInput,
+        updated_at: new Date(),
+      })
       .eq('id', id);
     if (error) throw error;
     return data;

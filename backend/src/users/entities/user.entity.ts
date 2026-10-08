@@ -14,6 +14,6 @@ export class User {
   last_name: string;
   @Field(() => String, { description: 'User image URL' })
   image_url: string;
-  @Field(() => Date, { description: 'User created at' })
-  created_at: Date;
+  @Field(() => String, { description: 'User created at' })
+  created_at: string;
 }

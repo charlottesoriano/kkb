@@ -103,9 +103,7 @@ class AuthService {
 
     try {
       if (!_clerk.isSignedIn) {
-        message = 'Not signed in';
-        status = false;
-        body = {};
+        return ResponseStatus(message: 'Not signed in', status: false, body: {});
       }
       final token = await _clerk.sessionToken();
 
@@ -197,35 +195,26 @@ class AuthService {
       onError: (error) => message = _messageFromError(error),
     );
 
-    print('----> authGoogleSignIn clerk: ${_clerk}');
 
     if (!_clerk.isSignedIn) {
     try {
-      print('----> authGoogleSignIn transfer');
       // New Google user: turn Clerk's 'transferable' sign-in into a sign-up.
       await _clerk.fetchApiResponse(
         '/client/sign_ups',
         params: {'transfer': true},
       );
-      print('----> authGoogleSignIn transfer success');
       _clerk.update();
     } catch (e) {
       // Fails if there was nothing to transfer, e.g. the user closed the Google page.
-      print('----> transfer failed: $e');
     }
   }
 
-    print('----> authGoogleSignIn: $message');
     status = _clerk.isSignedIn;
     if (message.isEmpty) {
       message = status ? 'Login Successful' : 'Google sign-in cancelled';
-      print('----> authGoogleSignIn message: $message');
     }
     body = _userBody();
-    print('----> authGoogleSignIn body: $body');
-    status = true;
   } catch (e) {
-    print('----> authGoogleSignIn error: $e');
     message = _messageFromError(e);
   }
   return ResponseStatus(message: message, status: status, body: body);

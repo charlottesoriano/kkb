@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Custom text styles for SplitMate
+/// Custom text styles for KKB
 /// Font: Plus Jakarta Sans (weights 400–800)
 /// Colors are intentionally NOT set here because they change with light/dark mode.
 /// Apply them with .copyWith(color: ...) or via the theme's DefaultTextStyle.
@@ -62,7 +62,7 @@ class KKBTextStyles {
   // HEADER STYLES (screen titles)
   // ============================================
 
-  /// "SplitMate" on Login
+  /// "KKB" on Login
   static const TextStyle headerXLarge = TextStyle(
     fontFamily: fontFamily,
     fontSize: 34,

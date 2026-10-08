@@ -9,7 +9,9 @@ part of '../group.dart';
 _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
-  createdBy: User.fromJson(json['created_by'] as Map<String, dynamic>),
+  createdBy: json['created_by'] == null
+      ? null
+      : User.fromJson(json['created_by'] as Map<String, dynamic>),
   description: json['description'] as String? ?? "",
   members:
       (json['members'] as List<dynamic>?)
@@ -21,6 +23,8 @@ _Group _$GroupFromJson(Map<String, dynamic> json) => _Group(
           ?.map((e) => Expense.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  isFavorite: json['is_favorite'] as bool? ?? false,
+  createdAt: json['created_at'] as String? ?? "",
 );
 
 Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
@@ -30,4 +34,6 @@ Map<String, dynamic> _$GroupToJson(_Group instance) => <String, dynamic>{
   'description': instance.description,
   'members': instance.members,
   'expenses': instance.expenses,
+  'is_favorite': instance.isFavorite,
+  'created_at': instance.createdAt,
 };

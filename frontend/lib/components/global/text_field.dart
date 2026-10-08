@@ -9,7 +9,7 @@ import 'package:KKB/utils/text_styles.dart'; // MTextStyles
 /// What kind of input this is. Controls keyboard, obscuring and default icons.
 enum KKBInputType { text, email, number, password, search }
 
-/// Global text input for SplitMate (search bar + all form fields).
+/// Global text input for KKB (search bar + all form fields).
 ///
 /// - [prefixIcon] / [suffixIcon]: pass any widget, or leave null for none.
 ///   (Search gets a default magnifier + clear button, password gets a default

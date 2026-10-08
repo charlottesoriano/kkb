@@ -62,9 +62,11 @@ class MyApp extends ConsumerWidget {
       ),
       themeMode: preferredMode == 'light' ? ThemeMode.light : ThemeMode.dark,
       routerConfig: router,
+      // Login vs app screens are handled by the router's redirect (core/router.dart).
+      // ClerkErrorListener shows Clerk errors as snackbars.
       builder: (context, child) => ClerkAuth(
         authState: clerk,
-        child: child!,
+        child: ClerkErrorListener(child: child!),
       ),
     );
   }

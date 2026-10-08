@@ -1,10 +1,14 @@
 import { Resolver, Query, Mutation, Args, Int, Float } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { ClerkGuard } from '../auth/auth.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
 import { BalancesService } from './balances.service.js';
 import { Balance } from './entities/balance.entity.js';
 import { CreateBalanceInput } from './dto/create-balance.input.js';
 import { UpdateBalanceInput } from './dto/update-balance.input.js';
 
 @Resolver(() => Balance)
+@UseGuards(ClerkGuard)
 export class BalancesResolver {
   constructor(private readonly balancesService: BalancesService) {}
 
@@ -14,7 +18,7 @@ export class BalancesResolver {
   }
 
   @Query(() => Float, { name: 'totalBalance' })
-  async totalBalance(@Args('userId', { type: () => String }) userId: string) {
+  async totalBalance(@CurrentUser() userId: string) {
     return this.balancesService.totalBalance(userId);
   }
 }

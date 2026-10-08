@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:KKB/utils/text_styles.dart';
 
-class BalanceHeader extends ConsumerStatefulWidget {
-  const BalanceHeader({super.key});
+class GroupsHeader extends ConsumerStatefulWidget {
+  const GroupsHeader({super.key, required this.onAddGroup});
+
+  final VoidCallback onAddGroup;
 
   /// Two lines at 28px (see [MTextStyles.headerLarge]) plus vertical padding inside the toolbar.
   static const double toolbarHeightForTwoLineTitle = 80;
@@ -16,15 +18,15 @@ class BalanceHeader extends ConsumerStatefulWidget {
   Size get preferredSize => const Size.fromHeight(toolbarHeightForTwoLineTitle);
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _BalanceHeaderState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _GroupsHeaderState();
 }
 
-class _BalanceHeaderState extends ConsumerState<BalanceHeader> {
+class _GroupsHeaderState extends ConsumerState<GroupsHeader> {
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      toolbarHeight: BalanceHeader.toolbarHeightForTwoLineTitle,
+      toolbarHeight: GroupsHeader.toolbarHeightForTwoLineTitle,
       centerTitle: false,
       backgroundColor: KKBColors.lightBackground,
       // Match icon/text defaults to page content; avoid same-as-bg (invisible defaults).
@@ -41,18 +43,21 @@ class _BalanceHeaderState extends ConsumerState<BalanceHeader> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          KKBTitle(title: 'Balances'),
+          KKBTitle(title: 'Groups'),
           Text('Tap a group to see its splits', style: KKBTextStyles.bodyMedium.copyWith(color: KKBColors.lightTextSecondary)),
         ],
       ),
       actions: [
-        IconButton(
-          onPressed: () {},
-          icon: SvgIcon(icon: KKBIcons.add, color: Colors.white),
-          style: IconButton.styleFrom(
-            backgroundColor: KKBColors.lightPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: IconButton(
+            onPressed: widget.onAddGroup,
+            icon: SvgIcon(icon: KKBIcons.add, color: Colors.white),
+            style: IconButton.styleFrom(
+              backgroundColor: KKBColors.lightPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              )
             ),
           ),
         ),

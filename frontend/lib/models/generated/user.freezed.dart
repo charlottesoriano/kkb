@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$User {
 
- String get id; String get email; String get displayName; String get firstName; String get lastName; String get imageUrl; DateTime get createdAt;
+ String get id; String get email; String get displayName; String get firstName; String get lastName; String get imageUrl; String get createdAt;
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $UserCopyWith<$Res>  {
   factory $UserCopyWith(User value, $Res Function(User) _then) = _$UserCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String displayName, String firstName, String lastName, String imageUrl, DateTime createdAt
+ String id, String email, String displayName, String firstName, String lastName, String imageUrl, String createdAt
 });
 
 
@@ -80,7 +80,7 @@ as String,firstName: null == firstName ? _self.firstName : firstName // ignore: 
 as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as String,
   ));
 }
 
@@ -165,7 +165,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String firstName,  String lastName,  String imageUrl,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String firstName,  String lastName,  String imageUrl,  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.lastName,_that.imageUrl,_that.createdAt);case _:
@@ -186,7 +186,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.las
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String firstName,  String lastName,  String imageUrl,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String displayName,  String firstName,  String lastName,  String imageUrl,  String createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _User():
 return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.lastName,_that.imageUrl,_that.createdAt);case _:
@@ -206,7 +206,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.las
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String displayName,  String firstName,  String lastName,  String imageUrl,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String displayName,  String firstName,  String lastName,  String imageUrl,  String createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _User() when $default != null:
 return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.lastName,_that.imageUrl,_that.createdAt);case _:
@@ -221,7 +221,7 @@ return $default(_that.id,_that.email,_that.displayName,_that.firstName,_that.las
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _User implements User {
-  const _User({required this.id, required this.email, required this.displayName, required this.firstName, required this.lastName, required this.imageUrl, required this.createdAt});
+  const _User({required this.id, required this.email, required this.displayName, required this.firstName, required this.lastName, required this.imageUrl, this.createdAt = ""});
   factory _User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
 @override final  String id;
@@ -230,7 +230,7 @@ class _User implements User {
 @override final  String firstName;
 @override final  String lastName;
 @override final  String imageUrl;
-@override final  DateTime createdAt;
+@override@JsonKey() final  String createdAt;
 
 /// Create a copy of User
 /// with the given fields replaced by the non-null parameter values.
@@ -267,7 +267,7 @@ abstract mixin class _$UserCopyWith<$Res> implements $UserCopyWith<$Res> {
   factory _$UserCopyWith(_User value, $Res Function(_User) _then) = __$UserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String displayName, String firstName, String lastName, String imageUrl, DateTime createdAt
+ String id, String email, String displayName, String firstName, String lastName, String imageUrl, String createdAt
 });
 
 
@@ -293,7 +293,7 @@ as String,firstName: null == firstName ? _self.firstName : firstName // ignore: 
 as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as String,
   ));
 }
 

@@ -13,7 +13,7 @@ abstract class User with _$User {
     required String firstName,
     required String lastName,
     required String imageUrl,
-    required DateTime createdAt,
+    @Default("") String createdAt,
   }) = _User;
 
   factory User.fromJson(Map<String, Object?> json) => _$UserFromJson(json);

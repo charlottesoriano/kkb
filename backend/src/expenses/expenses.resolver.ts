@@ -1,15 +1,19 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
+import { ClerkGuard } from '../auth/auth.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
 import { ExpensesService } from './expenses.service.js';
 import { Expense } from './entities/expense.entity.js';
 import { CreateExpenseInput } from './dto/create-expense.input.js';
 import { UpdateExpenseInput } from './dto/update-expense.input.js';
 
 @Resolver(() => Expense)
+@UseGuards(ClerkGuard)
 export class ExpensesResolver {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Mutation(() => Expense)
-  createExpense(@Args('createExpenseInput') createExpenseInput: CreateExpenseInput, userId: string) {
+  createExpense(@Args('createExpenseInput') createExpenseInput: CreateExpenseInput, @CurrentUser() userId: string) {
     return this.expensesService.create(createExpenseInput, userId);
   }
 

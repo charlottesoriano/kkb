@@ -47,6 +47,10 @@ class KKBColors {
   static const Color lightAvatar4 = Color(0xFF41436A);
   static const Color lightOnAvatar4 = Color(0xFFFFFFFF);
 
+  //Texts
+  static const Color lightTextError = Color(0xFFB3223F);
+  static const Color lightTextSuccess = Color(0xFF166B48);
+
   // ───────────────────────── DARK ─────────────────────────
 
   // Backgrounds & surfaces

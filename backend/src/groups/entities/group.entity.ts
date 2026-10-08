@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { User } from '../../users/entities/user.entity.js';
 
 @ObjectType()
 export class Group {
@@ -10,6 +11,10 @@ export class Group {
   description: string;
   @Field(() => String, { description: 'Group created by' })
   created_by: string;
-  @Field(() => Date, { description: 'Group created at' })
-  created_at: Date;
+  @Field(() => String, { description: 'Group created at' })
+  created_at: string;
+  @Field(() => Boolean, { nullable: true, description: 'Whether the current user favorited this group' })
+  is_favorite?: boolean;
+  @Field(() => [User], { nullable: true, description: 'Group members' })
+  members?: User[];
 }

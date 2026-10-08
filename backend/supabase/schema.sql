@@ -11,6 +11,7 @@ create table users (
 
 create table groups (
   id          bigint generated always as identity primary key,
+  code        text not null unique,
   name        text not null,
   description text not null,
   created_by  text not null,                 -- Clerk user id
@@ -32,6 +33,7 @@ create table expenses (
   amount       numeric(12, 2) not null check (amount > 0),
   paid_by      text not null references users(id),
   created_at   timestamptz not null default now()
+  updated_at   timestamptz
 );
 
 -- who owes what for each expense

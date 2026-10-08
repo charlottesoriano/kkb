@@ -2,14 +2,22 @@ import 'package:KKB/components/global/svg_icon.dart';
 import 'package:KKB/const/icons.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/providers/global/preferred_mode.dart';
+import 'package:KKB/providers/groups/user_groups.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class AppNavigation extends ConsumerWidget {
+class AppNavigation extends ConsumerStatefulWidget {
   const AppNavigation({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
+
+  @override
+  ConsumerState<AppNavigation> createState() => _AppNavigationState();
+}
+
+class _AppNavigationState extends ConsumerState<AppNavigation> with WidgetsBindingObserver {
+  StatefulNavigationShell get navigationShell => widget.navigationShell;
 
   void _onTap(int index) {
     navigationShell.goBranch(
@@ -20,7 +28,21 @@ class AppNavigation extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializedUserData();
+    });
+  }
+
+  void _initializedUserData() {
+    print('---> _initializedUserData');
+    ref.read(userGroupsProvider.notifier).fetchUserGroups();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = ref.watch(preferredModeProvider) == 'dark';
 
     final background = isDark ? KKBColors.darkBackground : KKBColors.lightBackground;
@@ -61,8 +83,9 @@ class AppNavigation extends ConsumerWidget {
             ),
           ),
           destinations: [
+            destination(KKBIcons.expenses, 'Groups'),
             destination(KKBIcons.wallet, 'Balances'),
-            destination(KKBIcons.addCircle, 'Add'),
+            // destination(KKBIcons.addCircle, 'Add'),
             destination(KKBIcons.settle, 'Settle up'),
             destination(KKBIcons.settings, 'Settings'),
           ],

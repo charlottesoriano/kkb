@@ -14,6 +14,6 @@ export class Settlement {
   amount: number;
   @Field(() => String, { description: 'Settlement status' })
   status: string;
-  @Field(() => Date, { description: 'Settlement created at' })
-  created_at: Date;
+  @Field(() => String, { description: 'Settlement created at' })
+  created_at: string;
 }

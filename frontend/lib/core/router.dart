@@ -1,5 +1,5 @@
-import 'package:KKB/components/expenses/add_expenses.dart';
 import 'package:KKB/components/navigation.dart';
+import 'package:KKB/components/groups/index.dart';
 import 'package:KKB/components/balances/index.dart';
 import 'package:KKB/components/settings/index.dart';
 import 'package:KKB/components/signin/index.dart';
@@ -11,7 +11,7 @@ import 'package:go_router/go_router.dart';
 /// Route paths in one place so you never mistype them
 class AppRoutes {
   static const login = '/login';
-  static const balances = '/balances';
+  static const groups = '/groups';
   static const add = '/add';
   static const settle = '/settle';
   static const settings = '/settings';
@@ -24,7 +24,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final clerk = ref.read(clerkProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.balances,
+    initialLocation: AppRoutes.groups,
 
     // ClerkAuthState is a ChangeNotifier, so the router re-runs `redirect`
     // every time the user signs in or out.
@@ -35,7 +35,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final onLogin = state.matchedLocation == AppRoutes.login;
 
       if (!signedIn && !onLogin) return AppRoutes.login;
-      if (signedIn && onLogin) return AppRoutes.balances;
+      if (signedIn && onLogin) return AppRoutes.groups;
       return null; // no redirect
     },
 
@@ -50,14 +50,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(
-              path: AppRoutes.balances,
-              builder: (context, state) => const BalancesIndex(),
+              path: AppRoutes.groups,
+              builder: (context, state) => const GroupsIndex(),
             ),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(
               path: AppRoutes.add,
-              builder: (context, state) => const AddExpensesWidget(),
+              builder: (context, state) => const BalancesIndex(),
             ),
           ]),
           StatefulShellBranch(routes: [

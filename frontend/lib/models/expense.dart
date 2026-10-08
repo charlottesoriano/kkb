@@ -11,7 +11,8 @@ abstract class Expense with _$Expense {
     required int id,
     required User paidBy,
     @Default("") String description,
-    @Default(0) double amount
+    @Default(0) double amount,
+    @Default("") String createdAt,
   }) = _Expense;
 
   factory Expense.fromJson(Map<String, Object?> json) => _$ExpenseFromJson(json);

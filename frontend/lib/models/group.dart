@@ -11,10 +11,12 @@ abstract class Group with _$Group {
   const factory Group({
     required int id,
     required String name,
-    required User createdBy,
+    @Default(null) User? createdBy,
     @Default("") String description,
     @Default([]) List<User> members,
     @Default([]) List<Expense> expenses,
+    @Default(false) bool isFavorite,
+    @Default("") String createdAt,
   }) = _Group;
 
   factory Group.fromJson(Map<String, Object?> json) => _$GroupFromJson(json);
