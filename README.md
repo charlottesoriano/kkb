@@ -1,5 +1,18 @@
 # kkb
 
+**KKB** (*Kanya Kanyang Bayad*, "each pays their own") is a mini project: a mobile app for splitting shared expenses within a group. Members join a group with an invite code, log expenses split equally or by custom amounts, see who owes whom, and record payments that the receiver confirms. Members also get push notifications for payment reminders and recorded payments.
+
+For a detailed walkthrough of each feature, see [WORKFLOWS.md](WORKFLOWS.md).
+
+## Stack
+
+- **Frontend:** Flutter (Dart), Riverpod, go_router, graphql_flutter, freezed
+- **Backend:** NestJS (TypeScript) with a GraphQL API (Apollo)
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Clerk (email/password and Google sign-in)
+- **Push notifications:** Firebase Cloud Messaging
+- **Testing:** Vitest
+
 ## Backend setup
 
 ### 1. Install and run
