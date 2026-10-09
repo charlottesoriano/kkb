@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { User } from '../../users/entities/user.entity.js';
 
 @ObjectType()
 export class Settlement {
@@ -6,14 +7,12 @@ export class Settlement {
   id: number;
   @Field(() => Int, { description: 'Group the settlement belongs to' })
   group_id: number;
-  @Field(() => String, { description: 'From user ID' })
-  from_user: string;
-  @Field(() => String, { description: 'From user name', nullable: true })
-  from_user_name: string;
-  @Field(() => String, { description: 'To user ID' })
-  to_user: string;
-  @Field(() => String, { description: 'To user name', nullable: true })
-  to_user_name: string;
+  //from user
+  @Field(() => User, { description: 'From user' })
+  from_user: User;
+  //to user
+  @Field(() => User, { description: 'To user' })
+  to_user: User;
   @Field(() => Float, { description: 'Settlement amount' })
   amount: number;
   @Field(() => String, { description: 'Settlement status' })

@@ -1,4 +1,4 @@
-import 'package:KKB/components/expenses/add_expense_shared.dart';
+import 'package:KKB/components/global/member_avatar.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/user.dart';
 import 'package:KKB/utils/text_styles.dart';
@@ -6,13 +6,7 @@ import 'package:flutter/material.dart';
 
 // horizontal list of members to pick who paid
 class WhoPaid extends StatelessWidget {
-  const WhoPaid({
-    super.key,
-    required this.members,
-    required this.paidById,
-    required this.userId,
-    required this.onSelect,
-  });
+  const WhoPaid({super.key, required this.members, required this.paidById, required this.userId, required this.onSelect});
 
   final List<User> members;
   final String? paidById;
@@ -36,14 +30,13 @@ class WhoPaid extends StatelessWidget {
                 child: Column(
                   spacing: 6,
                   children: [
-                    ExpenseMemberAvatar(member: member, colorIndex: index, size: 52, selected: member.id == paidById),
+                    MemberAvatar(user: member, colorIndex: index, size: 52, selected: member.id == paidById),
                     Text(
                       member.id == userId ? '${member.firstName} (you)' : member.firstName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: (member.id == paidById ? KKBTextStyles.bodySmallBold : KKBTextStyles.bodySmall)
-                          .copyWith(color: KKBColors.lightTextPrimary),
+                      style: (member.id == paidById ? KKBTextStyles.bodySmallBold : KKBTextStyles.bodySmall).copyWith(color: KKBColors.lightTextPrimary),
                     ),
                   ],
                 ),

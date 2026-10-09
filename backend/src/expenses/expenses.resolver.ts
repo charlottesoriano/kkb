@@ -6,6 +6,7 @@ import { ExpensesService } from './expenses.service.js';
 import { Expense } from './entities/expense.entity.js';
 import { CreateExpenseInput } from './dto/create-expense.input.js';
 import { UpdateExpenseInput } from './dto/update-expense.input.js';
+import { CreateExpenseSplitInput } from './dto/create-expense-split.input.js';
 
 @Resolver(() => Expense)
 @UseGuards(ClerkGuard)
@@ -13,9 +14,13 @@ export class ExpensesResolver {
   constructor(private readonly expensesService: ExpensesService) {}
 
   @Mutation(() => Expense)
-  createExpense(@Args('createExpenseInput') createExpenseInput: CreateExpenseInput, @CurrentUser() userId: string) {
+  createExpense(
+    @Args('createExpenseInput') createExpenseInput: CreateExpenseInput,
+    @Args('splits', { type: () => [CreateExpenseSplitInput] }) splits: CreateExpenseSplitInput[],
+    @CurrentUser() userId: string,
+  ) {
     // scenario for the user id: the user may have been asked to create an expense paid by another member
-    return this.expensesService.create(createExpenseInput, userId);
+    return this.expensesService.create(createExpenseInput, splits, userId);
   }
 
   @Query(() => [Expense], { name: 'expenses' })

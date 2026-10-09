@@ -13,7 +13,7 @@ abstract class Settlement with _$Settlement {
     required User fromUser,
     required User toUser,
     required double amount,
-    @Default("pending") String status,
+    @Default("unpaid") String status,
     required DateTime createdAt,
   }) = _Settlement;
 

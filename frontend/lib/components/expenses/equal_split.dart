@@ -1,3 +1,4 @@
+import 'package:KKB/components/global/member_avatar.dart';
 import 'package:KKB/components/expenses/add_expense_shared.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/user.dart';
@@ -6,13 +7,7 @@ import 'package:flutter/material.dart';
 
 // "Split between" section: tick which members share the bill equally
 class EqualSplit extends StatelessWidget {
-  const EqualSplit({
-    super.key,
-    required this.members,
-    required this.selectedIds,
-    required this.equalShare,
-    required this.onToggle,
-  });
+  const EqualSplit({super.key, required this.members, required this.selectedIds, required this.equalShare, required this.onToggle});
 
   // all group members, the payer included since they pay their own share too
   final List<User> members;
@@ -31,10 +26,7 @@ class EqualSplit extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const ExpenseSectionLabel('Split between'),
-            Text(
-              '${expenseCurrency.format(equalShare)} each',
-              style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
-            ),
+            Text('${expenseCurrency.format(equalShare)} each', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
           ],
         ),
         const SizedBox(height: 10),
@@ -48,14 +40,7 @@ class EqualSplit extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary),
                 )
-              : Wrap(
-                  alignment: WrapAlignment.spaceAround,
-                  spacing: 8,
-                  runSpacing: 16,
-                  children: [
-                    for (final (index, member) in others) _buildSplitMember(member, index),
-                  ],
-                ),
+              : Wrap(alignment: WrapAlignment.spaceAround, spacing: 8, runSpacing: 16, children: [for (final (index, member) in others) _buildSplitMember(member, index)]),
         ),
       ],
     );
@@ -77,7 +62,7 @@ class EqualSplit extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  ExpenseMemberAvatar(member: member, colorIndex: colorIndex, size: 40),
+                  MemberAvatar(user: member, colorIndex: colorIndex, size: 40),
                   if (selected)
                     Positioned(
                       right: -4,

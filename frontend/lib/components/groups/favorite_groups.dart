@@ -5,6 +5,9 @@ import 'package:KKB/components/global/svg_icon.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/const/icons.dart';
 import 'package:KKB/models/group.dart';
+import 'package:KKB/providers/auth/current_user.dart';
+import 'package:KKB/providers/groups/group_balances.dart';
+import 'package:KKB/providers/groups/group_settlements.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,17 +16,11 @@ class FavoriteGroupsList extends ConsumerStatefulWidget {
   const FavoriteGroupsList({
     super.key,
     required this.groups,
-    this.balances = const {},
-    this.pendingConfirmations = const {},
     this.onTap,
     this.onToggleFavorite,
   });
 
   final List<Group> groups;
-  // group id -> your net balance (positive = you're owed, negative = you owe)
-  final Map<int, double> balances;
-  // group id -> number of payments waiting on you to confirm
-  final Map<int, int> pendingConfirmations;
   final void Function(Group group)? onTap;
   final void Function(Group group, bool isFavorite)? onToggleFavorite;
 
@@ -34,6 +31,28 @@ class FavoriteGroupsList extends ConsumerStatefulWidget {
 class _FavoriteGroupsListState extends ConsumerState<FavoriteGroupsList> {
   static const double _cardWidth = 260;
   static const double _cardHeight = 200;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCardData(widget.groups);
+  }
+
+  @override
+  void didUpdateWidget(covariant FavoriteGroupsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // only fetch groups that were just added to favorites
+    final oldIds = oldWidget.groups.map((group) => group.id).toSet();
+    _fetchCardData(widget.groups.where((group) => !oldIds.contains(group.id)));
+  }
+
+  // each card's balance and pending payments come from that group's own providers
+  void _fetchCardData(Iterable<Group> groups) {
+    for (final group in groups) {
+      ref.read(groupBalancesProvider(group.id).notifier).fetchGroupBalances();
+      ref.read(groupSettlementsProvider(group.id).notifier).fetchGroupSettlements();
+    }
+  }
 
   //the provider flips the flag optimistically and rolls back on failure
   Future<void> _toggleFavorite(Group group) async {
@@ -47,6 +66,8 @@ class _FavoriteGroupsListState extends ConsumerState<FavoriteGroupsList> {
 
   @override
   Widget build(BuildContext context) {
+    final userId = ref.watch(currentUserProvider)?.id ?? '';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -70,13 +91,16 @@ class _FavoriteGroupsListState extends ConsumerState<FavoriteGroupsList> {
               separatorBuilder: (_, _) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final group = widget.groups[index];
-          
+                final balance = ref.watch(groupBalancesProvider(group.id)).where((b) => b.user.id == userId).firstOrNull?.amount ?? 0;
+                // payments other members recorded that are waiting on you to confirm
+                final pendingConfirmations = ref.watch(groupSettlementsProvider(group.id)).where((s) => s.status == 'pending' && s.toUser.id == userId).length;
+
                 return KKBGroupCard(
                   group: group,
                   width: _cardWidth,
-                  balance: widget.balances[group.id] ?? 0,
+                  balance: balance,
                   isFavorite: group.isFavorite,
-                  pendingConfirmations: widget.pendingConfirmations[group.id] ?? 0,
+                  pendingConfirmations: pendingConfirmations,
                   onTap: widget.onTap == null ? null : () => widget.onTap!(group),
                   onToggleFavorite: () => _toggleFavorite(group),
                 );

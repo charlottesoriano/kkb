@@ -110,7 +110,7 @@ class UserGroups extends _$UserGroups {
   });
 
   Future<void> fetchUserGroups() => Helper.guard(() async {
-    print('----> fetchUserGroups');
+    // print('----> fetchUserGroups');
     final client = ref.read(graphqlClientProvider);
     final result = await client.query(
       QueryOptions(
@@ -142,32 +142,32 @@ class UserGroups extends _$UserGroups {
       )
     );
 
-    print('----> result: ${result.data}');
+    // print('----> result: ${result.data}');
 
     if (result.hasException) {
-      print('----> result.hasException: ${Helper.error(result)}');
+      // print('----> result.hasException: ${Helper.error(result)}');
       return ResponseStatus(message: Helper.error(result), status: false, body: {});
       // throw Exception(Helper.error(result));
     }
 
     if (result.data == null) {
-      print('----> result.data is null');
+      // print('----> result.data is null');
       return ResponseStatus(message: 'No groups found', status: false, body: {});
     }
 
-    print('----> result.data is not null');
+    // print('----> result.data is not null');
 
     final List<dynamic> userGroups = result.data?['userGroups'] ?? [];
-    print('----> userGroups: $userGroups');
+    // print('----> userGroups: $userGroups');
     List<Group> groups = userGroups.map((group) => _parseGroup(group)).toList();
-    print('----> groups: $groups');
+    // print('----> groups: $groups');
 
     //order groups by created_at descending
     groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    print('----> groups sorted: $groups');
+    // print('----> groups sorted: $groups');
     //if there is no selected group, set the first group as selected
     if(groups.isNotEmpty) setSelectedGroup(groups.first);
-    print('----> setSelectedGroup: ${groups.first}');
+    // print('----> setSelectedGroup: ${groups.first}');
 
     state = groups;
 

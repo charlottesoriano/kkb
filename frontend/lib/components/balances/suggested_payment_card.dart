@@ -1,3 +1,4 @@
+import 'package:KKB/components/global/member_avatar.dart';
 import 'package:KKB/components/balances/balances_shared.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/core/router.dart';
@@ -29,9 +30,9 @@ class SuggestedPaymentCard extends StatelessWidget {
           Row(
             spacing: 4,
             children: [
-              BalanceMemberAvatar(group: group, member: payment.from),
+              MemberAvatar(user: payment.from, colorIndex: MemberAvatar.colorIndexIn(group.members, payment.from.id)),
               const Icon(Icons.arrow_forward_rounded, size: 14, color: KKBColors.lightTextSecondary),
-              BalanceMemberAvatar(group: group, member: payment.to),
+              MemberAvatar(user: payment.to, colorIndex: MemberAvatar.colorIndexIn(group.members, payment.to.id)),
             ],
           ),
           Expanded(
@@ -44,10 +45,7 @@ class SuggestedPaymentCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: KKBTextStyles.bodySmallBold.copyWith(color: KKBColors.lightTextPrimary),
                 ),
-                Text(
-                  isMine ? 'Pay to settle your balance' : 'Suggested payment',
-                  style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
-                ),
+                Text(isMine ? 'Pay to settle your balance' : 'Suggested payment', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
               ],
             ),
           ),
@@ -55,12 +53,7 @@ class SuggestedPaymentCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             spacing: 6,
             children: [
-              Text(
-                balanceCurrency.format(payment.amount),
-                style: KKBTextStyles.bodyMediumXBold.copyWith(
-                  color: isMine ? KKBColors.lightOwe : KKBColors.lightTextPrimary,
-                ),
-              ),
+              Text(balanceCurrency.format(payment.amount), style: KKBTextStyles.bodyMediumXBold.copyWith(color: isMine ? KKBColors.lightOwe : KKBColors.lightTextPrimary)),
               if (isMine)
                 FilledButton(
                   onPressed: () => context.go(AppRoutes.groupSettle),

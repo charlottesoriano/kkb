@@ -1,3 +1,4 @@
+import 'package:KKB/components/global/member_avatar.dart';
 import 'package:KKB/components/expenses/add_expense_shared.dart';
 import 'package:KKB/components/global/text_field.dart';
 import 'package:KKB/const/colors.dart';
@@ -7,14 +8,7 @@ import 'package:flutter/material.dart';
 
 // "Split between" section for custom amounts: type how much each member owes
 class CustomSplit extends StatelessWidget {
-  const CustomSplit({
-    super.key,
-    required this.members,
-    required this.controllers,
-    required this.amount,
-    required this.assigned,
-    required this.onChanged,
-  });
+  const CustomSplit({super.key, required this.members, required this.controllers, required this.amount, required this.assigned, required this.onChanged});
 
   // all group members, the payer included since they pay their own share too
   final List<User> members;
@@ -37,10 +31,7 @@ class CustomSplit extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const ExpenseSectionLabel('Split between'),
-            Text(
-              'Enter each share',
-              style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
-            ),
+            Text('Enter each share', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
           ],
         ),
         const SizedBox(height: 10),
@@ -56,10 +47,7 @@ class CustomSplit extends StatelessWidget {
                 )
               : Column(
                   children: [
-                    for (final (index, member) in others) ...[
-                      _buildMemberRow(member, index),
-                      const SizedBox(height: 10),
-                    ],
+                    for (final (index, member) in others) ...[_buildMemberRow(member, index), const SizedBox(height: 10)],
                     const Divider(height: 16, color: KKBColors.lightBorder),
                     _buildSummary(),
                   ],
@@ -73,7 +61,7 @@ class CustomSplit extends StatelessWidget {
     return Row(
       spacing: 12,
       children: [
-        ExpenseMemberAvatar(member: member, colorIndex: colorIndex, size: 36),
+        MemberAvatar(user: member, colorIndex: colorIndex, size: 36),
         Expanded(
           child: Text(
             member.firstName,
@@ -92,10 +80,7 @@ class CustomSplit extends StatelessWidget {
             backgroundColor: KKBColors.lightBackground,
             textAlign: TextAlign.end,
             textStyle: KKBTextStyles.bodyLargeBold,
-            prefixIcon: Text(
-              '₱',
-              style: KKBTextStyles.bodyMediumBold.copyWith(color: KKBColors.lightTextSecondary),
-            ),
+            prefixIcon: Text('₱', style: KKBTextStyles.bodyMediumBold.copyWith(color: KKBColors.lightTextSecondary)),
             onChanged: (_) => onChanged(),
           ),
         ),
@@ -111,8 +96,8 @@ class CustomSplit extends StatelessWidget {
     final pillText = balanced
         ? '${expenseCurrency.format(0)} left'
         : remaining > 0
-            ? '${expenseCurrency.format(remaining)} left'
-            : '${expenseCurrency.format(remaining.abs())} over';
+        ? '${expenseCurrency.format(remaining)} left'
+        : '${expenseCurrency.format(remaining.abs())} over';
     final foreground = balanced ? KKBColors.lightOwed : KKBColors.lightOwe;
     final background = balanced ? KKBColors.lightOwedBackground : KKBColors.lightOweBackground;
 

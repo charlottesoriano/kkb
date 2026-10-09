@@ -13,6 +13,11 @@ _Expense _$ExpenseFromJson(Map<String, dynamic> json) => _Expense(
   description: json['description'] as String? ?? "",
   amount: (json['amount'] as num?)?.toDouble() ?? 0,
   createdAt: json['created_at'] as String? ?? "",
+  splits:
+      (json['splits'] as List<dynamic>?)
+          ?.map((e) => ExpenseSplit.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$ExpenseToJson(_Expense instance) => <String, dynamic>{
@@ -22,4 +27,5 @@ Map<String, dynamic> _$ExpenseToJson(_Expense instance) => <String, dynamic>{
   'description': instance.description,
   'amount': instance.amount,
   'created_at': instance.createdAt,
+  'splits': instance.splits,
 };

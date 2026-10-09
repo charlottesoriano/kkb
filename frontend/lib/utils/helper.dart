@@ -3,9 +3,11 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:KKB/models/response_status.dart';
+import 'package:KKB/models/expense.dart';
 import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class Helper {
   Helper._();
@@ -60,5 +62,16 @@ class Helper {
       return words.first.substring(0, words.first.length.clamp(0, 2)).toUpperCase();
     }
     return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  static NumberFormat currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
+
+  static String formatDate(String date, {String format = 'MMM d'}) {
+    return DateFormat(format).format(DateTime.parse(date));
+  }
+
+  static double getUserBalance(Expense expense, String userId) {
+    final userShare = expense.splits.where((split) => split.user.id == userId).fold<double>(0, (sum, split) => sum + split.amount);
+    return expense.paidBy.id == userId ? expense.amount - userShare : -userShare;
   }
 }

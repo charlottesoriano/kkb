@@ -8,12 +8,12 @@ import 'package:KKB/components/global/group_header.dart';
 import 'package:KKB/components/global/title.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/expense_input.dart';
+import 'package:KKB/models/expense_split_input.dart';
 import 'package:KKB/models/group.dart';
 import 'package:KKB/models/response_status.dart';
-import 'package:KKB/models/settlement_input.dart';
 import 'package:KKB/models/user.dart';
 import 'package:KKB/providers/auth/current_user.dart';
-import 'package:KKB/providers/expenses/expenses.dart';
+import 'package:KKB/providers/groups/group_expenses.dart';
 import 'package:KKB/providers/groups/selected_group.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/utils/text_styles.dart';
@@ -33,9 +33,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   final _amountController = TextEditingController();
 
   // one input per member for the custom amounts form
-  late final Map<String, TextEditingController> _customControllers = {
-    for (final member in mounted ? ref.read(selectedGroupProvider)?.members ?? [] : []) member.id: TextEditingController(),
-  };
+  late final Map<String, TextEditingController> _customControllers;
 
   SplitType _splitType = SplitType.equal;
   String? _paidById;
@@ -43,9 +41,10 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   bool _submitting = false;
 
   // members ticked in "Split between" (the payer included)
-  late final Set<String> _selectedIds = mounted ? ref.read(selectedGroupProvider)?.members.map((m) => m.id).toSet() ?? {} : {};
+  late final Set<String> _selectedIds;
 
-  List<User> get _members => mounted ? ref.read(selectedGroupProvider)?.members.toList() ?? [] : [];
+  // the group's members, read once in initState so the controllers above always match them
+  late final List<User> _members;
 
   // everyone who shares the bill = ticked members, the payer included
   List<User> get _splitMembers => _members.where((m) => _selectedIds.contains(m.id)).toList();
@@ -54,10 +53,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
 
   double get _equalShare => _splitMembers.isEmpty ? 0 : _amount / _splitMembers.length;
 
-  double get _customTotal => _splitMembers.fold(
-        0,
-        (sum, m) => sum + (double.tryParse(_customControllers[m.id]!.text) ?? 0),
-      );
+  double get _customTotal => _splitMembers.fold(0, (sum, m) => sum + (double.tryParse(_customControllers[m.id]!.text) ?? 0));
 
   bool get _canSubmit {
     if (_descriptionController.text.trim().isEmpty || _amount <= 0 || _splitMembers.isEmpty) {
@@ -72,6 +68,10 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   @override
   void initState() {
     super.initState();
+    _members = ref.read(selectedGroupProvider)?.members.toList() ?? [];
+    _customControllers = {for (final m in _members) m.id: TextEditingController()};
+    _selectedIds = _members.map((m) => m.id).toSet();
+
     // default payer: the signed-in user if they're in the group, otherwise the first member
     final userId = ref.read(currentUserProvider)?.id;
     _paidById = _members.any((m) => m.id == userId) ? userId : _members.firstOrNull?.id;
@@ -93,27 +93,15 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
     if (group == null || paidById == null) return;
 
     // member id -> their share of the bill (the payer's own share included)
-    final shares = {
-      for (final m in _splitMembers)
-        m.id: _splitType == SplitType.equal
-            ? _equalShare
-            : double.tryParse(_customControllers[m.id]!.text) ?? 0,
-    };
+    final shares = {for (final m in _splitMembers) m.id: _splitType == SplitType.equal ? _equalShare : double.tryParse(_customControllers[m.id]!.text) ?? 0};
 
-    // everyone except the payer owes the payer their share
-    final settlements = [
+    // every member's share of the bill, stored as the expense's splits
+    final splits = [
       for (final MapEntry(key: memberId, value: share) in shares.entries)
-        if (memberId != paidById && share > 0)
-          SettlementInput(fromUser: memberId, toUser: paidById, amount: double.parse(share.toStringAsFixed(2))),
+        if (share > 0) ExpenseSplitInput(userId: memberId, amount: double.parse(share.toStringAsFixed(2))),
     ];
 
-    final expenseInput = ExpenseInput(
-      groupId: group.id,
-      paidBy: paidById,
-      description: _descriptionController.text.trim(),
-      amount: _amount,
-      settlements: settlements,
-    );
+    final expenseInput = ExpenseInput(groupId: group.id, paidBy: paidById, description: _descriptionController.text.trim(), amount: _amount, splits: splits);
 
     setState(() => _submitting = true);
     ResponseStatus result = await ref.read(groupExpensesProvider.notifier).createExpense(expenseInput);
@@ -134,13 +122,13 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
 
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
-      //to-do
-      appBar: group != null
-          ? KKBGroupHeader(
-              group: group,
-              onTapGroup: () => context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses),
-            )
-          : null,
+      // appBar: group != null
+      //     ? KKBGroupHeader(
+      //         group: group,
+      //         onTapGroup: () => context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses),
+      //       )
+      //     : null,
+      appBar: KKBGroupHeader(onTapGroup: () => context.go(AppRoutes.groupExpenses)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: Column(
@@ -148,29 +136,17 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
           children: [
             const KKBTitle(title: 'Add expense'),
             const SizedBox(height: 16),
-            ExpenseDetailsCard(
-              descriptionController: _descriptionController,
-              amountController: _amountController,
-              onChanged: () => setState(() {}),
-            ),
+            ExpenseDetailsCard(descriptionController: _descriptionController, amountController: _amountController, onChanged: () => setState(() {})),
             const SizedBox(height: 20),
 
             const ExpenseSectionLabel('Who paid?'),
             const SizedBox(height: 10),
-            WhoPaid(
-              members: _members,
-              paidById: _paidById,
-              userId: userId,
-              onSelect: (id) => setState(() => _paidById = id),
-            ),
+            WhoPaid(members: _members, paidById: _paidById, userId: userId, onSelect: (id) => setState(() => _paidById = id)),
             const SizedBox(height: 20),
 
             const ExpenseSectionLabel('Split type'),
             const SizedBox(height: 10),
-            SplitTypeToggle(
-              value: _splitType,
-              onChanged: (type) => setState(() => _splitType = type),
-            ),
+            SplitTypeToggle(value: _splitType, onChanged: (type) => setState(() => _splitType = type)),
             const SizedBox(height: 20),
 
             if (_splitType == SplitType.equal)
@@ -203,10 +179,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
                 children: [
                   const Icon(Icons.notifications_none_rounded, size: 18, color: KKBColors.lightTextSecondary),
                   Expanded(
-                    child: Text(
-                      'Everyone in the group gets a push notification when you add this.',
-                      style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
-                    ),
+                    child: Text('Everyone in the group gets a push notification when you add this.', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
                   ),
                 ],
               ),
@@ -223,10 +196,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
                     disabledForegroundColor: KKBColors.lightOnPrimary,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: Text(
-                    'Add expense · ${expenseCurrency.format(_amount)}',
-                    style: KKBTextStyles.buttonLarge,
-                  ),
+                  child: Text('Add expense · ${expenseCurrency.format(_amount)}', style: KKBTextStyles.buttonLarge),
                 ),
               ),
             ],

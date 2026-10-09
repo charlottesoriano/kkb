@@ -12,9 +12,11 @@ _ExpenseInput _$ExpenseInputFromJson(Map<String, dynamic> json) =>
       paidBy: json['paid_by'] as String,
       description: json['description'] as String,
       amount: (json['amount'] as num).toDouble(),
-      settlements:
-          (json['settlements'] as List<dynamic>?)
-              ?.map((e) => SettlementInput.fromJson(e as Map<String, dynamic>))
+      splits:
+          (json['splits'] as List<dynamic>?)
+              ?.map(
+                (e) => ExpenseSplitInput.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           const [],
     );
@@ -25,5 +27,5 @@ Map<String, dynamic> _$ExpenseInputToJson(_ExpenseInput instance) =>
       'paid_by': instance.paidBy,
       'description': instance.description,
       'amount': instance.amount,
-      'settlements': instance.settlements.map((e) => e.toJson()).toList(),
+      'splits': instance.splits.map((e) => e.toJson()).toList(),
     };

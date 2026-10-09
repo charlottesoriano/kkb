@@ -12,7 +12,7 @@ _Settlement _$SettlementFromJson(Map<String, dynamic> json) => _Settlement(
   fromUser: User.fromJson(json['from_user'] as Map<String, dynamic>),
   toUser: User.fromJson(json['to_user'] as Map<String, dynamic>),
   amount: (json['amount'] as num).toDouble(),
-  status: json['status'] as String? ?? "pending",
+  status: json['status'] as String? ?? "unpaid",
   createdAt: DateTime.parse(json['created_at'] as String),
 );
 

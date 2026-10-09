@@ -1,3 +1,4 @@
+import 'package:KKB/components/global/balance_label.dart';
 import 'package:KKB/components/global/empty_state.dart';
 import 'package:KKB/components/global/label.dart';
 import 'package:KKB/components/global/svg_icon.dart';
@@ -10,17 +11,9 @@ import 'package:KKB/utils/helper.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 class UserGroupsList extends ConsumerStatefulWidget {
-  const UserGroupsList({
-    super.key,
-    required this.groups,
-    this.balances = const {},
-    this.onTap,
-    this.onToggleFavorite,
-    this.byUser = false,
-  });
+  const UserGroupsList({super.key, required this.groups, this.balances = const {}, this.onTap, this.onToggleFavorite, this.byUser = false});
 
   final List<Group> groups;
   // group id -> your net balance (positive = you're owed, negative = you owe)
@@ -40,8 +33,6 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
     (KKBColors.lightAvatar3, KKBColors.lightOnAvatar3),
   ];
 
-  final _currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
-
   //the provider flips the flag optimistically and rolls back on failure
   Future<void> _toggleFavorite(Group group) async {
     final result = await ref.read(userGroupsProvider.notifier).toggleFavorite(group.id);
@@ -58,20 +49,13 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 24),
-        KKBLabel(
-          title: widget.byUser ? 'My groups' : 'Joined groups',
-          subtitle: 'Created by ${widget.byUser ? 'you' : 'others'} · ${widget.groups.length}',
-        ),
+        KKBLabel(title: widget.byUser ? 'My groups' : 'Joined groups', subtitle: 'Created by ${widget.byUser ? 'you' : 'others'} · ${widget.groups.length}'),
         const SizedBox(height: 4),
 
         if (widget.groups.isEmpty)
           KKBEmptyState(title: 'No groups found', subtitle: '${widget.byUser ? 'Create a group' : 'Join a group'} to get started')
         else
-          Column(
-            spacing: 12,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [for (final group in widget.groups) _buildCard(group)],
-          ),
+          Column(spacing: 12, crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final group in widget.groups) _buildCard(group)]),
       ],
     );
   }
@@ -89,15 +73,12 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
         mainAxisSize: MainAxisSize.min,
         spacing: 12,
         children: [
-          _buildBalance(widget.balances[group.id] ?? 0),
+          BalanceLabel(balance: widget.balances[group.id] ?? 0),
           // favorite toggle
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => _toggleFavorite(group),
-            child: SvgIcon(
-              icon: isFavorite ? KKBIcons.starFilled : KKBIcons.starOutlined,
-              color: isFavorite ? KKBColors.lightPrimary : KKBColors.lightTextSecondary,
-            ),
+            child: SvgIcon(icon: isFavorite ? KKBIcons.starFilled : KKBIcons.starOutlined, color: isFavorite ? KKBColors.lightPrimary : KKBColors.lightTextSecondary),
           ),
         ],
       ),
@@ -111,30 +92,8 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
       width: 44,
       height: 44,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: avatarColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        Helper.initials(group.name),
-        style: KKBTextStyles.bodyMediumXBold.copyWith(color: onAvatarColor),
-      ),
-    );
-  }
-
-  Widget _buildBalance(double balance) {
-    final (label, color) = switch (balance) {
-      > 0 => ("You're owed", KKBColors.lightOwed),
-      < 0 => ('You owe', KKBColors.lightOwe),
-      _ => ('All settled up', KKBColors.lightTextSecondary),
-    };
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(label, style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
-        Text(_currency.format(balance.abs()), style: KKBTextStyles.bodyLargeXBold.copyWith(color: color)),
-      ],
+      decoration: BoxDecoration(color: avatarColor, borderRadius: BorderRadius.circular(12)),
+      child: Text(Helper.initials(group.name), style: KKBTextStyles.bodyMediumXBold.copyWith(color: onAvatarColor)),
     );
   }
 }

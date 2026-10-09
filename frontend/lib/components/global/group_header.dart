@@ -1,21 +1,13 @@
 import 'package:KKB/components/global/group_header_bell.dart';
 import 'package:KKB/components/global/group_header_card.dart';
 import 'package:KKB/const/colors.dart';
-import 'package:KKB/models/group.dart';
 import 'package:flutter/material.dart';
 
 // app bar shared by the group screens: group chip (taps back to groups) on the left, notification bell on the right
 // usage: Scaffold(appBar: KKBGroupHeader(group: group))
 class KKBGroupHeader extends StatelessWidget implements PreferredSizeWidget {
-  const KKBGroupHeader({
-    super.key,
-    required this.group,
-    this.hasNotifications = false,
-    this.onTapGroup,
-    this.onTapNotifications,
-  });
+  const KKBGroupHeader({super.key, this.hasNotifications = false, this.onTapGroup, this.onTapNotifications});
 
-  final Group group;
   // shows the red dot on the bell
   final bool hasNotifications;
   // e.g. open the group switcher

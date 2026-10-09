@@ -1,4 +1,4 @@
-import 'package:KKB/models/settlement_input.dart';
+import 'package:KKB/models/expense_split_input.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'generated/expense_input.freezed.dart';
@@ -12,7 +12,7 @@ abstract class ExpenseInput with _$ExpenseInput {
     required String paidBy,
     required String description,
     required double amount,
-    @Default([]) List<SettlementInput> settlements,
+    @Default([]) List<ExpenseSplitInput> splits,
   }) = _ExpenseInput;
 
   factory ExpenseInput.fromJson(Map<String, Object?> json) => _$ExpenseInputFromJson(json);

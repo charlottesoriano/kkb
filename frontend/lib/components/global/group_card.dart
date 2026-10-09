@@ -1,3 +1,5 @@
+import 'package:KKB/components/global/member_avatar.dart';
+import 'package:KKB/components/global/balance_label.dart';
 import 'package:KKB/components/global/svg_icon.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/const/icons.dart';
@@ -6,19 +8,9 @@ import 'package:KKB/models/user.dart';
 import 'package:KKB/utils/helper.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class KKBGroupCard extends StatelessWidget {
-  const KKBGroupCard({
-    super.key,
-    required this.group,
-    this.balance = 0,
-    this.isFavorite = false,
-    this.pendingConfirmations = 0,
-    this.width = 260,
-    this.onTap,
-    this.onToggleFavorite,
-  });
+  const KKBGroupCard({super.key, required this.group, this.balance = 0, this.isFavorite = false, this.pendingConfirmations = 0, this.width = 260, this.onTap, this.onToggleFavorite});
 
   final Group group;
   // positive = you're owed, negative = you owe
@@ -39,8 +31,6 @@ class KKBGroupCard extends StatelessWidget {
   static const int _maxVisibleMembers = 3;
   static const double _memberSize = 28;
   static const double _memberOverlap = 8;
-
-  static final _currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
 
   @override
   Widget build(BuildContext context) {
@@ -63,17 +53,16 @@ class KKBGroupCard extends StatelessWidget {
               children: [
                 // avatar + favorite toggle
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildAvatar(),
+                    const Spacer(),
+                    // sits in the top row so the card height stays the same with or without it
+                    if (pendingConfirmations > 0) ...[_buildPendingChip(), const SizedBox(width: 8)],
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: onToggleFavorite,
-                      child: SvgIcon(
-                        icon: isFavorite ? KKBIcons.starFilled : KKBIcons.starOutlined,
-                        color: isFavorite ? KKBColors.lightPrimary : KKBColors.lightTextSecondary,
-                      ),
+                      child: SvgIcon(icon: isFavorite ? KKBIcons.starFilled : KKBIcons.starOutlined, color: isFavorite ? KKBColors.lightPrimary : KKBColors.lightTextSecondary),
                     ),
                   ],
                 ),
@@ -93,17 +82,15 @@ class KKBGroupCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary),
                 ),
-                if (pendingConfirmations > 0) ...[
-                  const SizedBox(height: 8),
-                  _buildPendingChip(),
-                ],
                 const Spacer(),
 
                 // balance + members
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Expanded(child: _buildBalance()),
+                    Expanded(
+                      child: BalanceLabel(balance: balance, crossAxisAlignment: CrossAxisAlignment.start, labelStyle: KKBTextStyles.bodySmall, amountStyle: KKBTextStyles.headerSmall),
+                    ),
                     _buildMembers(group.members),
                   ],
                 ),
@@ -122,47 +109,18 @@ class KKBGroupCard extends StatelessWidget {
       width: 48,
       height: 48,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: avatarColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        Helper.initials(group.name),
-        style: KKBTextStyles.bodyMediumXBold.copyWith(color: onAvatarColor),
-      ),
+      decoration: BoxDecoration(color: avatarColor, borderRadius: BorderRadius.circular(12)),
+      child: Text(Helper.initials(group.name), style: KKBTextStyles.bodyMediumXBold.copyWith(color: onAvatarColor)),
     );
   }
 
   Widget _buildPendingChip() {
-    final label = '$pendingConfirmations payment${pendingConfirmations == 1 ? '' : 's'} to confirm';
+    final label = '$pendingConfirmations to confirm';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: KKBColors.lightChip,
-        borderRadius: BorderRadius.circular(999),
-      ),
+      decoration: BoxDecoration(color: KKBColors.lightChip, borderRadius: BorderRadius.circular(999)),
       child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightTextPrimary)),
-    );
-  }
-
-  Widget _buildBalance() {
-    final (label, color) = switch (balance) {
-      > 0 => ("You're owed", KKBColors.lightOwed),
-      < 0 => ('You owe', KKBColors.lightOwe),
-      _ => ('All settled up', KKBColors.lightTextSecondary),
-    };
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary)),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(_currency.format(balance.abs()), style: KKBTextStyles.headerSmall.copyWith(color: color)),
-        ),
-      ],
     );
   }
 
@@ -183,36 +141,27 @@ class KKBGroupCard extends StatelessWidget {
           for (var i = 0; i < visible.length; i++)
             Positioned(
               left: i * step,
-              child: _buildMemberCircle(
-                label: Helper.initials('${visible[i].firstName} ${visible[i].lastName}'),
-                colors: _avatarColors[i % _avatarColors.length],
-              ),
+              child: MemberAvatar(user: visible[i], size: _memberSize, colorIndex: i, bordered: true),
             ),
-          if (extra > 0)
-            Positioned(
-              left: visible.length * step,
-              child: _buildMemberCircle(
-                label: '+$extra',
-                colors: (KKBColors.lightSurfaceVariant, KKBColors.lightTextPrimary),
-              ),
-            ),
+          if (extra > 0) Positioned(left: visible.length * step, child: _buildExtraCircle(extra)),
         ],
       ),
     );
   }
 
-  Widget _buildMemberCircle({required String label, required (Color, Color) colors}) {
+  // "+N" circle for members past the visible ones
+  Widget _buildExtraCircle(int extra) {
     return Container(
       width: _memberSize,
       height: _memberSize,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: colors.$1,
+        color: KKBColors.lightSurfaceVariant,
         shape: BoxShape.circle,
         // white ring separates overlapping circles
         border: Border.all(color: KKBColors.lightSurface, width: 2),
       ),
-      child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: colors.$2)),
+      child: Text('+$extra', style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightTextPrimary)),
     );
   }
 }

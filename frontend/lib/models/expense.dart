@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:KKB/models/user.dart';
-
+import 'package:KKB/models/expense_split.dart';
 part 'generated/expense.freezed.dart';
 part 'generated/expense.g.dart';
 
@@ -14,6 +14,7 @@ abstract class Expense with _$Expense {
     @Default("") String description,
     @Default(0) double amount,
     @Default("") String createdAt,
+    @Default([]) List<ExpenseSplit> splits,
   }) = _Expense;
 
   factory Expense.fromJson(Map<String, Object?> json) => _$ExpenseFromJson(json);

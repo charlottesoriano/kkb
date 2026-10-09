@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Expense {
 
- int get id; User get paidBy; int get groupId; String get description; double get amount; String get createdAt;
+ int get id; User get paidBy; int get groupId; String get description; double get amount; String get createdAt; List<ExpenseSplit> get splits;
 /// Create a copy of Expense
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $ExpenseCopyWith<Expense> get copyWith => _$ExpenseCopyWithImpl<Expense>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Expense;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Expense&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.paidBy, _this.paidBy) || other.paidBy == _this.paidBy)&&(identical(other.groupId, _this.groupId) || other.groupId == _this.groupId)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Expense&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.paidBy, _this.paidBy) || other.paidBy == _this.paidBy)&&(identical(other.groupId, _this.groupId) || other.groupId == _this.groupId)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&const DeepCollectionEquality().equals(other.splits, _this.splits));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Expense;
-  return Object.hash(runtimeType,_this.id,_this.paidBy,_this.groupId,_this.description,_this.amount,_this.createdAt);
+  return Object.hash(runtimeType,_this.id,_this.paidBy,_this.groupId,_this.description,_this.amount,_this.createdAt,const DeepCollectionEquality().hash(_this.splits));
 }
 
 @override
 String toString() {
   final _this = this as Expense;
-  return 'Expense(id: ${_this.id}, paidBy: ${_this.paidBy}, groupId: ${_this.groupId}, description: ${_this.description}, amount: ${_this.amount}, createdAt: ${_this.createdAt})';
+  return 'Expense(id: ${_this.id}, paidBy: ${_this.paidBy}, groupId: ${_this.groupId}, description: ${_this.description}, amount: ${_this.amount}, createdAt: ${_this.createdAt}, splits: ${_this.splits})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $ExpenseCopyWith<$Res>  {
   factory $ExpenseCopyWith(Expense value, $Res Function(Expense) _then) = _$ExpenseCopyWithImpl;
 @useResult
 $Res call({
- int id, User paidBy, int groupId, String description, double amount, String createdAt
+ int id, User paidBy, int groupId, String description, double amount, String createdAt, List<ExpenseSplit> splits
 });
 
 
@@ -71,7 +71,7 @@ class _$ExpenseCopyWithImpl<$Res>
 
 /// Create a copy of Expense
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? paidBy = null,Object? groupId = null,Object? description = null,Object? amount = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? paidBy = null,Object? groupId = null,Object? description = null,Object? amount = null,Object? createdAt = null,Object? splits = null,}) {
   return _then(Expense(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,paidBy: null == paidBy ? _self.paidBy : paidBy // ignore: cast_nullable_to_non_nullable
@@ -79,7 +79,8 @@ as User,groupId: null == groupId ? _self.groupId : groupId // ignore: cast_nulla
 as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as String,
+as String,splits: null == splits ? _self.splits : splits // ignore: cast_nullable_to_non_nullable
+as List<ExpenseSplit>,
   ));
 }
 /// Create a copy of Expense
@@ -173,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  User paidBy,  int groupId,  String description,  double amount,  String createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  User paidBy,  int groupId,  String description,  double amount,  String createdAt,  List<ExpenseSplit> splits)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Expense() when $default != null:
-return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amount,_that.createdAt);case _:
+return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amount,_that.createdAt,_that.splits);case _:
   return orElse();
 
 }
@@ -194,10 +195,10 @@ return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amou
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  User paidBy,  int groupId,  String description,  double amount,  String createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  User paidBy,  int groupId,  String description,  double amount,  String createdAt,  List<ExpenseSplit> splits)  $default,) {final _that = this;
 switch (_that) {
 case _Expense():
-return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amount,_that.createdAt);case _:
+return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amount,_that.createdAt,_that.splits);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -214,10 +215,10 @@ return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amou
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  User paidBy,  int groupId,  String description,  double amount,  String createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  User paidBy,  int groupId,  String description,  double amount,  String createdAt,  List<ExpenseSplit> splits)?  $default,) {final _that = this;
 switch (_that) {
 case _Expense() when $default != null:
-return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amount,_that.createdAt);case _:
+return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amount,_that.createdAt,_that.splits);case _:
   return null;
 
 }
@@ -229,7 +230,7 @@ return $default(_that.id,_that.paidBy,_that.groupId,_that.description,_that.amou
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _Expense implements Expense {
-  const _Expense({required this.id, required this.paidBy, required this.groupId, this.description = "", this.amount = 0, this.createdAt = ""});
+  const _Expense({required this.id, required this.paidBy, required this.groupId, this.description = "", this.amount = 0, this.createdAt = "",  List<ExpenseSplit> splits = const []}): _splits = splits;
   factory _Expense.fromJson(Map<String, dynamic> json) => _$ExpenseFromJson(json);
 
 @override final  int id;
@@ -238,6 +239,13 @@ class _Expense implements Expense {
 @override@JsonKey() final  String description;
 @override@JsonKey() final  double amount;
 @override@JsonKey() final  String createdAt;
+ final  List<ExpenseSplit> _splits;
+@override@JsonKey() List<ExpenseSplit> get splits {
+  if (_splits is EqualUnmodifiableListView) return _splits;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_splits);
+}
+
 
 /// Create a copy of Expense
 /// with the given fields replaced by the non-null parameter values.
@@ -252,18 +260,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Expense&&(identical(other.id, id) || other.id == id)&&(identical(other.paidBy, paidBy) || other.paidBy == paidBy)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.description, description) || other.description == description)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Expense&&(identical(other.id, id) || other.id == id)&&(identical(other.paidBy, paidBy) || other.paidBy == paidBy)&&(identical(other.groupId, groupId) || other.groupId == groupId)&&(identical(other.description, description) || other.description == description)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&const DeepCollectionEquality().equals(other.splits, _splits));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,paidBy,groupId,description,amount,createdAt);
+    return Object.hash(runtimeType,id,paidBy,groupId,description,amount,createdAt,const DeepCollectionEquality().hash(_splits));
 }
 
 @override
 String toString() {
-    return 'Expense(id: $id, paidBy: $paidBy, groupId: $groupId, description: $description, amount: $amount, createdAt: $createdAt)';
+    return 'Expense(id: $id, paidBy: $paidBy, groupId: $groupId, description: $description, amount: $amount, createdAt: $createdAt, splits: $splits)';
 }
 
 
@@ -274,7 +282,7 @@ abstract mixin class _$ExpenseCopyWith<$Res> implements $ExpenseCopyWith<$Res> {
   factory _$ExpenseCopyWith(_Expense value, $Res Function(_Expense) _then) = __$ExpenseCopyWithImpl;
 @override @useResult
 $Res call({
- int id, User paidBy, int groupId, String description, double amount, String createdAt
+ int id, User paidBy, int groupId, String description, double amount, String createdAt, List<ExpenseSplit> splits
 });
 
 
@@ -291,7 +299,7 @@ class __$ExpenseCopyWithImpl<$Res>
 
 /// Create a copy of Expense
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? paidBy = null,Object? groupId = null,Object? description = null,Object? amount = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? paidBy = null,Object? groupId = null,Object? description = null,Object? amount = null,Object? createdAt = null,Object? splits = null,}) {
   return _then(_Expense(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,paidBy: null == paidBy ? _self.paidBy : paidBy // ignore: cast_nullable_to_non_nullable
@@ -299,7 +307,8 @@ as User,groupId: null == groupId ? _self.groupId : groupId // ignore: cast_nulla
 as int,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
 as double,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as String,
+as String,splits: null == splits ? _self._splits : splits // ignore: cast_nullable_to_non_nullable
+as List<ExpenseSplit>,
   ));
 }
 

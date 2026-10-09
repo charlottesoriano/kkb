@@ -41,7 +41,7 @@ final class SelectedGroupProvider
   }
 }
 
-String _$selectedGroupHash() => r'8c633c3e56619d5b6337bc8b508c62bd113bc1df';
+String _$selectedGroupHash() => r'4179dde187c822f9d592bc34a11a41c74ed4ec69';
 
 abstract class _$SelectedGroup extends $Notifier<Group?> {
   Group? build();

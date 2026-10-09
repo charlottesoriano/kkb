@@ -239,7 +239,7 @@ return $default(_that.id,_that.groupId,_that.fromUser,_that.toUser,_that.amount,
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _Settlement implements Settlement {
-  const _Settlement({required this.id, required this.groupId, required this.fromUser, required this.toUser, required this.amount, this.status = "pending", required this.createdAt});
+  const _Settlement({required this.id, required this.groupId, required this.fromUser, required this.toUser, required this.amount, this.status = "unpaid", required this.createdAt});
   factory _Settlement.fromJson(Map<String, dynamic> json) => _$SettlementFromJson(json);
 
 @override final  int id;

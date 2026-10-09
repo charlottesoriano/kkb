@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
 import { User } from '../../users/entities/user.entity.js';
+import { ExpenseSplit } from './expense_split.entity.js';
 
 @ObjectType()
 export class Expense {
@@ -15,4 +16,6 @@ export class Expense {
   paid_by: User;
   @Field(() => String, { description: 'Expense created at' })
   created_at: string;
+  @Field(() => [ExpenseSplit], { description: 'Expense splits' })
+  splits: ExpenseSplit[];
 }

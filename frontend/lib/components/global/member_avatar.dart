@@ -3,47 +3,72 @@ import 'package:KKB/models/user.dart';
 import 'package:KKB/utils/helper.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MemberAvatar extends ConsumerStatefulWidget {
-  const MemberAvatar({super.key, required this.user});
+class MemberAvatar extends StatelessWidget {
+  const MemberAvatar({super.key, required this.user, this.size = 32, this.colorIndex = 0, this.selected = false, this.bordered = false});
+
+  static const colors = [
+    (KKBColors.lightAvatar1, KKBColors.lightOnAvatar1),
+    (KKBColors.lightAvatar2, KKBColors.lightOnAvatar2),
+    (KKBColors.lightAvatar3, KKBColors.lightOnAvatar3),
+    (KKBColors.lightAvatar4, KKBColors.lightOnAvatar4),
+  ];
+
+  // the member's position in the group keeps their color the same across screens
+  static int colorIndexIn(List<User> members, String userId) {
+    final index = members.indexWhere((member) => member.id == userId);
+    return index < 0 ? 0 : index;
+  }
 
   final User user;
-
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _MemberAvatarState();
-}
-
-class _MemberAvatarState extends ConsumerState<MemberAvatar> {
+  final double size;
+  final int colorIndex;
+  // primary ring around the avatar, e.g. the selected payer
+  final bool selected;
+  // white ring separates overlapping circles
+  final bool bordered;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
+    final (avatarColor, onAvatarColor) = colors[colorIndex % colors.length];
+
+    final circle = Container(
+      width: size,
+      height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: KKBColors.lightAvatar1,
+        color: avatarColor,
         shape: BoxShape.circle,
-        // white ring separates overlapping circles
-        border: Border.all(color: KKBColors.lightSurface, width: 2),
+        border: bordered ? Border.all(color: KKBColors.lightSurface, width: 2) : null,
       ),
-      child: widget.user.imageUrl.isEmpty
-          ? _initials()
+      child: user.imageUrl.isEmpty
+          ? _initials(onAvatarColor)
           : ClipOval(
               child: Image.network(
-                widget.user.imageUrl,
+                user.imageUrl,
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
                 // fall back to initials if the image fails to load
-                errorBuilder: (context, error, stackTrace) => _initials(),
+                errorBuilder: (context, error, stackTrace) => _initials(onAvatarColor),
               ),
             ),
     );
+
+    if (!selected) return circle;
+
+    // selected ring: avatar -> white gap -> primary ring
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: KKBColors.lightPrimary, width: 2),
+      ),
+      child: circle,
+    );
   }
 
-  Widget _initials() {
-    return Text(Helper.initials(widget.user.displayName), style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightOnAvatar1));
+  Widget _initials(Color color) {
+    return Text(Helper.initials('${user.firstName} ${user.lastName}'), style: (size >= 48 ? KKBTextStyles.bodyMediumXBold : KKBTextStyles.bodyXSmallBold).copyWith(color: color));
   }
 }
