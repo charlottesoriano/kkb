@@ -527,21 +527,3 @@ These GraphQL operations exist and are guarded, but no screen calls them yet:
 | `totalBalance` | The user's balance across all groups |
 | `userFavorites` CRUD (`createUserFavorite`, `userFavorites`, …) | Duplicates `favoriteGroup` |
 | `user` | The signed-in user's row |
-
----
-
-## 14. Known gaps and inconsistencies
-
-These came up while tracing the workflows. They are listed here for reference and have not been fixed.
-
-1. **`groupBalances` does not check membership.** [balances.resolver.ts](backend/src/balances/balances.resolver.ts) passes `groupId` straight to the service without calling `assertMember`. Any signed-in user can read any group's balances and member details by trying group ids.
-2. **No notification for new expenses.** The Add Expense screen says "Everyone in the group gets a push notification when you add this", but `ExpensesService.create` does not send any notifications.
-3. **No notification for confirmed or rejected payments.** The notification card has an icon for "confirmed" titles, but `updateSettlement` only notifies on a change to `pending`, so the payer is never told the result.
-4. **Group list balances are always ₱0.** `UserGroupsList` accepts a `balances` map, but [groups/index.dart](frontend/lib/components/groups/index.dart) never passes one.
-5. **The notification dot is always shown.** Screens pass `hasNotifications: true` as a fixed value. `notifications.is_read` exists in the schema but is never set or read.
-6. **Two GraphQL client providers.** [core/graphql.dart](frontend/lib/core/graphql.dart) defines `graphQLClientProvider`, which uses `10.0.2.2:3000` on Android. No code uses it. The app uses `graphqlClientProvider` from [providers/global/graphql_client.dart](frontend/lib/providers/global/graphql_client.dart).
-7. **Deleting an account is only a soft delete** ([10.2](#102-delete-account)). The Clerk account remains, nothing reads `deleted_at`, and the user's name and email are still visible to other members.
-8. **Profile edits are not saved to Clerk** ([10.1](#101-edit-profile)). The next `user.updated` webhook can undo them.
-9. **The notifications screen opens two ways.** It is registered as the `/notifications` route, but the bell opens it with `Navigator.push(MaterialPageRoute(...))` instead of the router.
-10. **Expense and split inserts are not atomic.** They are compensated by deleting the expense on failure, not wrapped in a database transaction. Group creation and the creator's membership work the same way.
-11. **Leftover code.** `ParseAmountPipe` does nothing. The balances module has unused create and update DTOs. [services/auth.dart](frontend/lib/services/auth.dart) is empty. `createGroup` contains a `print` debug statement.
