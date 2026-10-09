@@ -41,7 +41,7 @@ final class GroupExpensesProvider
   }
 }
 
-String _$groupExpensesHash() => r'5c260fa5148a33e7ac1373c81e330482041f31c5';
+String _$groupExpensesHash() => r'7bbb2d73fb1c3ed0f0614db309d7583a197cfa4b';
 
 abstract class _$GroupExpenses extends $Notifier<List<Expense>> {
   List<Expense> build();

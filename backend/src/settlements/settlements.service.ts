@@ -4,6 +4,7 @@ import { UpdateSettlementInput } from './dto/update-settlement.input.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE } from '../supabase/supabase.provider.js';
 import { RecordPaymentInput } from './dto/record-payment.input.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 const USER_COLUMNS = 'id, email, display_name, first_name, last_name, image_url, created_at';
 
@@ -14,7 +15,8 @@ const SETTLEMENT_SELECT = `id, group_id, amount, status, created_at, from_user:u
 @Injectable()
 export class SettlementsService {
   constructor(
-    @Inject(SUPABASE) private db: SupabaseClient
+    @Inject(SUPABASE) private db: SupabaseClient,
+    private notificationsService: NotificationsService,
   ) {}
   async create(createSettlementInput: CreateSettlementInput) {
     const { data, error } = await this.db
@@ -38,6 +40,18 @@ export class SettlementsService {
       .select(SETTLEMENT_SELECT)
       .single();
     if (error) throw error;
+
+    // the payer marked it as paid, so let the receiver know it's waiting for them to confirm
+    if (changes.status === 'pending') {
+      const from = data.from_user as any;
+      const to = data.to_user as any;
+      await this.notificationsService.create(
+        from.id,
+        to.id,
+        'Payment recorded',
+        `${from.display_name ?? from.email} recorded a payment of ${data.amount}`,
+      );
+    }
     return data;
   }
 

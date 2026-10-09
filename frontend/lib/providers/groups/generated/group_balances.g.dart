@@ -58,7 +58,7 @@ final class GroupBalancesProvider
   }
 }
 
-String _$groupBalancesHash() => r'6f1ea6b078a06bfa04b4a245f5304b527a0b52b6';
+String _$groupBalancesHash() => r'6aca65cce1367ac0a76764ddd972f90a6bc27521';
 
 final class GroupBalancesFamily extends $Family
     with

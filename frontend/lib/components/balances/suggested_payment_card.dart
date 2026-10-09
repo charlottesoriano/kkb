@@ -3,12 +3,14 @@ import 'package:KKB/components/balances/balances_shared.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/models/group.dart';
+import 'package:KKB/providers/groups/group_settlements.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-// one "X pays Y" row, with settle up if it's the current user's payment, remind otherwise
-class SuggestedPaymentCard extends StatelessWidget {
+// one "X pays Y" row, with settle up if it's the current user's payment, remind if it's owed to them
+class SuggestedPaymentCard extends ConsumerStatefulWidget {
   const SuggestedPaymentCard({super.key, required this.group, required this.payment, required this.userId});
 
   final Group group;
@@ -16,8 +18,33 @@ class SuggestedPaymentCard extends StatelessWidget {
   final String userId;
 
   @override
+  ConsumerState<SuggestedPaymentCard> createState() => _SuggestedPaymentCardState();
+}
+
+class _SuggestedPaymentCardState extends ConsumerState<SuggestedPaymentCard> {
+  // blocks repeat taps while the reminder is being sent
+  bool _sending = false;
+
+  Future<void> _remind() async {
+    setState(() => _sending = true);
+    final result = await ref.read(groupSettlementsProvider(widget.group.id).notifier).sendReminder(widget.payment.from, widget.payment.amount);
+    if (!mounted) return;
+    setState(() => _sending = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result.message ?? 'An error occurred'),
+        backgroundColor: result.status ? KKBColors.lightTextSuccess : KKBColors.lightTextError,
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isMine = payment.from.id == userId;
+    final payment = widget.payment;
+    final group = widget.group;
+    final isMine = payment.from.id == widget.userId;
+    // only the person being paid can remind the payer
+    final isOwedToMe = payment.to.id == widget.userId;
     final title = isMine ? 'You pay ${payment.to.firstName}' : '${payment.from.firstName} pays ${payment.to.firstName}';
 
     return Container(
@@ -66,12 +93,11 @@ class SuggestedPaymentCard extends StatelessWidget {
                   ),
                   child: Text('Settle up', style: KKBTextStyles.buttonSmall),
                 )
-              else
+              else if (isOwedToMe)
                 OutlinedButton(
-                  // TODO: send a reminder notification
-                  onPressed: () {},
+                  onPressed: _sending ? null : _remind,
                   style: balanceOutlinedButtonStyle(),
-                  child: Text('Remind', style: KKBTextStyles.buttonSmall),
+                  child: Text(_sending ? 'Sending…' : 'Remind', style: KKBTextStyles.buttonSmall),
                 ),
             ],
           ),

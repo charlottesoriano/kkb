@@ -41,7 +41,7 @@ final class UserGroupsProvider
   }
 }
 
-String _$userGroupsHash() => r'2c206bc5e3d3185c62a72ff5f13fe97f86c7eafb';
+String _$userGroupsHash() => r'ea0a283121e96e8c07cda7ab387b8e33898a5d12';
 
 abstract class _$UserGroups extends $Notifier<List<Group>> {
   List<Group> build();

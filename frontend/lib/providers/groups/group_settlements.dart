@@ -246,4 +246,29 @@ class GroupSettlements extends _$GroupSettlements {
 
     return ResponseStatus(message: 'Settlement updated successfully', status: true, body: updated);
   });
+
+  //asks a member to pay what they owe; the server saves it as a notification for them
+  Future<ResponseStatus> sendReminder(User toUser, double amount) => Helper.guard(() async {
+    final client = ref.read(graphqlClientProvider);
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(r'''
+          mutation SendReminder($input: SendReminderInput!) {
+            sendReminder(sendReminderInput: $input) {
+              id
+            }
+          }
+        '''),
+        variables: {
+          "input": {"group_id": groupId, "to_user": toUser.id, "amount": amount},
+        },
+      )
+    );
+
+    if (result.hasException) {
+      return ResponseStatus(message: Helper.error(result), status: false, body: {});
+    }
+
+    return ResponseStatus(message: 'Reminder sent to ${toUser.firstName}', status: true, body: {});
+  });
 }
