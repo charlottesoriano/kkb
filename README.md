@@ -1,5 +1,18 @@
 # kkb
 
+**KKB** (*Kanya Kanyang Bayad*, "each pays their own") is a mini project: a mobile app for splitting shared expenses within a group. Members join a group with an invite code, log expenses split equally or by custom amounts, see who owes whom, and record payments that the receiver confirms. Members also get push notifications for payment reminders and recorded payments.
+
+For a detailed walkthrough of each feature, see [WORKFLOWS.md](WORKFLOWS.md).
+
+## Stack
+
+- **Frontend:** Flutter (Dart), Riverpod, go_router, graphql_flutter, freezed
+- **Backend:** NestJS (TypeScript) with a GraphQL API (Apollo)
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Clerk (email/password and Google sign-in)
+- **Push notifications:** Firebase Cloud Messaging
+- **Testing:** Vitest
+
 ## Backend setup
 
 ### 1. Install and run
@@ -25,6 +38,9 @@ CLERK_SECRET_KEY=
 CLERK_WEBHOOK_SIGNING_SECRET=
 SUPABASE_URL=
 SUPABASE_SERVICE_KEY=
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
 ```
 
 #### Clerk
@@ -56,6 +72,30 @@ ngrok http 3000
 
 > The service key bypasses Row Level Security. Keep it on the backend only — never commit it or expose it to the frontend.
 
+#### Firebase
+
+These let the backend send push notifications through Firebase Cloud Messaging. See [`PUSH_NOTIFICATIONS.md`](PUSH_NOTIFICATIONS.md) for the full push setup (Firebase CLI, `flutterfire configure`, etc.).
+
+1. Sign in to the [Firebase Console](https://console.firebase.google.com) and select (or create) your project.
+2. Go to **Project settings → Service accounts** and click **Generate new private key**. A JSON file downloads.
+3. Copy these fields from the JSON into `backend/.env`:
+
+   | `.env` variable | JSON field |
+   | --- | --- |
+   | `FIREBASE_PROJECT_ID` | `project_id` |
+   | `FIREBASE_CLIENT_EMAIL` | `client_email` |
+   | `FIREBASE_PRIVATE_KEY` | `private_key` |
+
+   ```env
+   FIREBASE_PROJECT_ID=...
+   FIREBASE_CLIENT_EMAIL=...
+   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   ```
+
+4. Delete the downloaded JSON file.
+
+> Keep the quotes and the literal `\n`s on the private key; the backend turns them back into newlines. Like the Supabase service key, these credentials are backend-only — never commit them.
+
 ### 3. Create the database tables
 
 The schema lives in [`backend/supabase/schema.sql`](backend/supabase/schema.sql).
@@ -67,3 +107,81 @@ The schema lives in [`backend/supabase/schema.sql`](backend/supabase/schema.sql)
 5. Check **Table Editor** — you should see `users`, `groups`, `members`, `expenses`, `expense_splits`, `settlements`, `device_tokens` and `user_favorites`.
 
 > The script uses plain `create table`, so running it a second time fails with "relation already exists". To start over, drop the existing tables first.
+
+## Frontend setup
+
+The frontend is a Flutter app in `frontend/`. Make sure the [backend](#backend-setup) is running first.
+
+### 1. Prerequisites
+
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (Dart `^3.13.2`) — run `flutter doctor` to confirm your setup.
+- An emulator/simulator or a physical device (`flutter devices` lists what's available).
+
+### 2. Environment variables
+
+Inside `frontend/`, copy `.env.example` to `.env` and fill in the values below:
+
+```bash
+cd frontend/
+cp .env.example .env
+```
+
+```env
+CLERK_PUBLISHABLE_KEY=
+API_BASE_URL=
+```
+
+**`CLERK_PUBLISHABLE_KEY`**
+
+1. In the [Clerk Dashboard](https://dashboard.clerk.com), open the **same application** used by the backend.
+2. Go to **Configure → API Keys**.
+3. Copy the **Publishable key** (starts with `pk_test_` or `pk_live_`).
+
+**`API_BASE_URL`**
+
+The full GraphQL endpoint of the backend, including `/graphql`. Which host to use depends on where the app runs:
+
+| Running on | `API_BASE_URL` |
+| --- | --- |
+| iOS simulator, desktop, web | `http://localhost:3000/graphql` |
+| Android emulator | `http://10.0.2.2:3000/graphql` (the emulator's alias for your machine's `localhost`) |
+| Physical device on the same Wi-Fi | `http://<your-computer-LAN-IP>:3000/graphql` |
+
+> `.env` is bundled as a Flutter asset, so after changing it do a full restart (stop and re-run `flutter run`) — hot reload won't pick it up.
+
+### 3. Install and run
+
+```bash
+cd frontend/
+flutter pub get
+flutter run
+```
+
+If more than one device is connected, pick one with `flutter run -d <device-id>`.
+
+Generated files (`*.g.dart`, `*.freezed.dart`) are committed. If you change a Riverpod provider, Freezed model or `json_serializable` class, regenerate them with:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### Alternative: reach the backend through ngrok
+
+If the app can't reach your local backend (e.g. a physical device on a different network, firewall issues, or you're getting `Network error. Is the backend/ngrok running?`), expose the backend with a public tunnel instead:
+
+1. With the backend running, start a tunnel to its port:
+
+   ```bash
+   ngrok http 3000
+   ```
+
+2. Copy the **Forwarding** URL ngrok prints (e.g. `https://<random-name>.ngrok-free.app`).
+3. Set it in `frontend/.env`, adding `/graphql` at the end:
+
+   ```env
+   API_BASE_URL=https://<random-name>.ngrok-free.app/graphql
+   ```
+
+4. Fully restart the app (`flutter run`).
+
+The app already sends the `ngrok-skip-browser-warning` header, so ngrok's free-tier warning page won't block requests. Free ngrok URLs change each time you restart ngrok — update `API_BASE_URL` (and the Clerk webhook endpoint, if you set one up with the same tunnel) whenever that happens.

@@ -1,16 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { UserFavoritesResolver } from './user-favorites.resolver.js';
-import { UserFavoritesService } from './user-favorites.service.js';
 
 describe('UserFavoritesResolver', () => {
+  let service: any;
   let resolver: UserFavoritesResolver;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [UserFavoritesResolver, UserFavoritesService],
-    }).compile();
-
-    resolver = module.get<UserFavoritesResolver>(UserFavoritesResolver);
+  beforeEach(() => {
+    // resolvers only forward to the service, so a plain object of vi.fn()s is enough
+    service = {};
+    resolver = new UserFavoritesResolver(service);
   });
 
   it('should be defined', () => {

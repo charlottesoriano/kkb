@@ -6,6 +6,7 @@ import { GroupsService } from './groups.service.js';
 import { Group } from './entities/group.entity.js';
 import { CreateGroupInput } from './dto/create-group.input.js';
 import { UpdateGroupInput } from './dto/update-group.input.js';
+import { User } from '../users/entities/user.entity.js';
 
 @Resolver(() => Group)
 @UseGuards(ClerkGuard)
@@ -18,13 +19,13 @@ export class GroupsResolver {
   }
 
   @Mutation(() => Group)
-  updateGroup(@Args('input') input: UpdateGroupInput, @Args('groupId', { type: () => Int }) groupId: number) {
-    return this.groupsService.update(groupId, input);
+  updateGroup(@Args('input') input: UpdateGroupInput, @Args('groupId', { type: () => Int }) groupId: number, @CurrentUser() userId: string) {
+    return this.groupsService.update(groupId, input, userId);
   }
 
   @Mutation(() => Group)
-  removeGroup(@Args('groupId', { type: () => Int }) groupId: number) {
-    return this.groupsService.remove(groupId);
+  removeGroup(@Args('groupId', { type: () => Int }) groupId: number, @CurrentUser() userId: string) {
+    return this.groupsService.remove(groupId, userId);
   }
 
   @Query(() => [Group], { name: 'userGroups' })
@@ -37,14 +38,18 @@ export class GroupsResolver {
     return this.groupsService.findFavoriteGroups(userId);
   }
 
-  @Query(() => [String], { name: 'groupMembers' })
-  async groupMembers(@Args('groupId', { type: () => Int }) groupId: number) {
-    return this.groupsService.findGroupMembers(groupId);
+  @Query(() => [User], { name: 'groupMembers' })
+  async groupMembers(@Args('groupId', { type: () => Int }) groupId: number, @CurrentUser() userId: string) {
+    return this.groupsService.findGroupMembers(groupId, userId);
   }
 
-  @Mutation(() => String)
-  removeMemberFromGroup(@Args('groupId', { type: () => Int }) groupId: number, @Args('userId', { type: () => String }) userId: string) {
-    return this.groupsService.removeMember(groupId, userId);
+  @Mutation(() => Boolean)
+  removeMemberFromGroup(
+    @Args('groupId', { type: () => Int }) groupId: number,
+    @Args('userId', { type: () => String }) userId: string,
+    @CurrentUser() currentUserId: string,
+  ) {
+    return this.groupsService.removeMember(groupId, userId, currentUserId);
   }
 
   @Mutation(() => Group)

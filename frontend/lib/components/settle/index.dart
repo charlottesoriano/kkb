@@ -23,18 +23,23 @@ class SettleIndex extends ConsumerWidget {
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
       appBar: KKBGroupHeader(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 16,
-          children: [
-            Text('Settle up', style: KKBTextStyles.headerMedium.copyWith(color: KKBColors.lightTextPrimary)),
-            SummaryCard(group: group, expenses: ref.watch(groupExpensesProvider), settlements: ref.watch(groupSettlementsProvider(group.id))),
-            const ConfirmationCard(),
-            RecordPaymentCard(members: group.members, userId: ref.watch(currentUserProvider)?.id ?? ''),
-            const PaymentHistoryCard(),
-          ],
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(selectedGroupProvider.notifier).fetchGroupData(group),
+        child: SingleChildScrollView(
+          // lets pull-to-refresh work even when the content is shorter than the screen
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 16,
+            children: [
+              Text('Settle up', style: KKBTextStyles.headerMedium.copyWith(color: KKBColors.lightTextPrimary)),
+              SummaryCard(group: group, expenses: ref.watch(groupExpensesProvider), settlements: ref.watch(groupSettlementsProvider(group.id))),
+              const ConfirmationCard(),
+              RecordPaymentCard(members: group.members, userId: ref.watch(currentUserProvider)?.id ?? ''),
+              const PaymentHistoryCard(),
+            ],
+          ),
         ),
       ),
     );

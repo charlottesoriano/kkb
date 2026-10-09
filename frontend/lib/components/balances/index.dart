@@ -1,14 +1,14 @@
+import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/components/global/section_label.dart';
 import 'package:KKB/components/balances/balances_shared.dart';
 import 'package:KKB/components/balances/everyones_balance.dart';
 import 'package:KKB/components/balances/invite_code_card.dart';
 import 'package:KKB/components/balances/net_balance_card.dart';
 import 'package:KKB/components/balances/suggested_payment_card.dart';
 import 'package:KKB/components/global/group_header.dart';
-import 'package:KKB/components/global/tile_card.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/balance.dart';
 import 'package:KKB/models/expense.dart';
-import 'package:KKB/models/group.dart';
 import 'package:KKB/models/settlement.dart';
 import 'package:KKB/models/user.dart';
 import 'package:KKB/providers/groups/group_balances.dart';
@@ -29,7 +29,7 @@ class BalancesIndex extends ConsumerStatefulWidget {
 class _BalancesIndexState extends ConsumerState<BalancesIndex> {
   // who still owes whom: each split is "split user owes the payer", paid settlements count the other way,
   // and debts between the same two people cancel out; whatever is left over is still pending
-  List<SuggestedPayment> _getSuggestedPayments(List<Expense> expenses, List<Settlement> settlements) {
+  List<SuggestedPayment> getSuggestedPayments(List<Expense> expenses, List<Settlement> settlements) {
     final users = <String, User>{};
     // "fromId|toId" -> total from has owed to
     final owed = <String, double>{};
@@ -70,32 +70,37 @@ class _BalancesIndexState extends ConsumerState<BalancesIndex> {
 
     final myBalance = balances.where((b) => b.user.id == userId).firstOrNull?.amount ?? 0;
     // expenses are newest first, so these are the 3 most recent pending payments
-    final suggestedPayments = _getSuggestedPayments(ref.watch(groupExpensesProvider), ref.watch(groupSettlementsProvider(group.id))).take(3);
+    final suggestedPayments = getSuggestedPayments(ref.watch(groupExpensesProvider), ref.watch(groupSettlementsProvider(group.id))).take(3);
 
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
       appBar: KKBGroupHeader(hasNotifications: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            NetBalanceCard(balance: myBalance),
-            const SizedBox(height: 12),
-            InviteCodeCard(inviteCode: group.code),
-            const SizedBox(height: 12),
-            const BalanceSectionLabel('Suggested payments'),
-            const SizedBox(height: 10),
-            Column(
-              spacing: 12,
-              children: [for (final payment in suggestedPayments) SuggestedPaymentCard(group: group, payment: payment, userId: userId)],
-            ),
-            const SizedBox(height: 20),
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(selectedGroupProvider.notifier).fetchGroupData(group),
+        child: SingleChildScrollView(
+          // lets pull-to-refresh work even when the content is shorter than the screen
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NetBalanceCard(balance: myBalance),
+              const SizedBox(height: 12),
+              InviteCodeCard(inviteCode: group.code),
+              const SizedBox(height: 12),
+              const KKBSectionLabel('Suggested payments', style: KKBTextStyles.bodyMediumBold),
+              const SizedBox(height: 10),
+              Column(
+                spacing: 12,
+                children: [for (final payment in suggestedPayments) SuggestedPaymentCard(group: group, payment: payment, userId: userId)],
+              ),
+              const SizedBox(height: 20),
 
-            const BalanceSectionLabel("Everyone's balance"),
-            const SizedBox(height: 10),
-            EveryonesBalance(group: group, balances: balances, userId: userId),
-          ],
+              const KKBSectionLabel("Everyone's balance", style: KKBTextStyles.bodyMediumBold),
+              const SizedBox(height: 10),
+              EveryonesBalance(group: group, balances: balances, userId: userId),
+            ],
+          ),
         ),
       ),
     );

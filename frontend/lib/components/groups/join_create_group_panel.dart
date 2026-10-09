@@ -1,5 +1,8 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/section_label.dart';
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +41,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
     KKBColors.lightNotificationDot,
     KKBColors.lightCategory4,
     KKBColors.lightOwed,
-    KKBColors.darkCategory1,
+    Color(0xFF7D80C2),
   ];
 
   static final _hexPattern = RegExp(r'^[0-9a-fA-F]{6}$');
@@ -77,7 +80,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
       if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Group joined successfully'), backgroundColor: KKBColors.lightTextSuccess));
       if(mounted && context.mounted) Navigator.pop(context);
     } else {
-      if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      if(mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
     }
   }
 
@@ -100,7 +103,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
       if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Group created successfully'), backgroundColor: KKBColors.lightTextSuccess));
       if(mounted && context.mounted) Navigator.pop(context);
     } else {
-      if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      if(mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
       setState(() {
         _nameController.text = '';
         _descriptionController.text = '';
@@ -115,7 +118,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // join with a code
-        Text('Join with a code', style: KKBTextStyles.bodySmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
+        const KKBSectionLabel('Join with a code'),
         const SizedBox(height: 6),
         Row(
           spacing: 8,
@@ -130,10 +133,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
                 onSubmitted: (_) => _onJoin(),
               ),
             ),
-            SizedBox(
-              height: 52,
-              child: _PrimaryButton(label: 'Join', onPressed: _onJoin),
-            ),
+            KKBButton(label: 'Join', height: 52, onPressed: _onJoin),
           ],
         ),
 
@@ -171,7 +171,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
         const SizedBox(height: 16),
 
         // group color
-        Text('Color', style: KKBTextStyles.bodySmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
+        const KKBSectionLabel('Color'),
         const SizedBox(height: 6),
         Wrap(
           spacing: 10,
@@ -218,10 +218,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
         ),
         const SizedBox(height: 16),
 
-        SizedBox(
-          height: 52,
-          child: _PrimaryButton(label: 'Create group', onPressed: _onCreate),
-        ),
+        KKBButton(label: 'Create group', height: 52, onPressed: _onCreate),
       ],
     );
   }
@@ -248,28 +245,6 @@ class _ColorSwatch extends StatelessWidget {
         ),
         child: selected ? const Icon(Icons.check_rounded, size: 18, color: KKBColors.lightOnPrimary) : null,
       ),
-    );
-  }
-}
-
-class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: KKBColors.lightPrimary,
-        foregroundColor: KKBColors.lightOnPrimary,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: KKBTextStyles.buttonMedium,
-      ),
-      child: Text(label),
     );
   }
 }

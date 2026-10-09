@@ -1,16 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { SettlementsResolver } from './settlements.resolver.js';
-import { SettlementsService } from './settlements.service.js';
 
 describe('SettlementsResolver', () => {
+  let service: any;
   let resolver: SettlementsResolver;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [SettlementsResolver, SettlementsService],
-    }).compile();
-
-    resolver = module.get<SettlementsResolver>(SettlementsResolver);
+  beforeEach(() => {
+    // resolvers only forward to the service, so a plain object of vi.fn()s is enough
+    service = {};
+    resolver = new SettlementsResolver(service);
   });
 
   it('should be defined', () => {

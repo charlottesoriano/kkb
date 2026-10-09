@@ -1,4 +1,5 @@
-import 'package:KKB/components/settle/settle_shared.dart';
+import 'package:KKB/components/global/card.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/expense.dart';
 import 'package:KKB/models/group.dart';
@@ -48,7 +49,8 @@ class SummaryCard extends StatelessWidget {
     final members = [...group.members]..sort((a, b) => (paid[b.id] ?? 0).compareTo(paid[a.id] ?? 0));
     final maxPaid = paid.values.fold(0.0, (max, p) => p > max ? p : max);
 
-    return SettleCard(
+    return KKBCard(
+      hasShadow: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -57,11 +59,11 @@ class SummaryCard extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: Text(settleCurrency.format(total), style: KKBTextStyles.displaySmall.copyWith(color: KKBColors.lightTextPrimary)),
+            child: Text(Helper.currency.format(total), style: KKBTextStyles.displaySmall.copyWith(color: KKBColors.lightTextPrimary)),
           ),
           const SizedBox(height: 6),
           Text(
-            '${expenses.length} expenses · ${settleCurrency.format(settled)} settled'
+            '${expenses.length} expenses · ${Helper.currency.format(settled)} settled'
             '${pendingCount > 0 ? ' · $pendingCount pending' : ''}',
             style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
           ),
@@ -107,14 +109,14 @@ class _PaidByBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(name, style: KKBTextStyles.bodyXSmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
-            Text(settleCurrency.format(paid), style: KKBTextStyles.bodyXSmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
+            Text(Helper.currency.format(paid), style: KKBTextStyles.bodyXSmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
           ],
         ),
         ClipRRect(
           borderRadius: BorderRadius.circular(999),
           child: LinearProgressIndicator(value: fraction, minHeight: 6, color: color, backgroundColor: KKBColors.lightSurfaceVariant),
         ),
-        Text('Share ${settleCurrency.format(share)} · settled ${settleCurrency.format(settled)}', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
+        Text('Share ${Helper.currency.format(share)} · settled ${Helper.currency.format(settled)}', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
       ],
     );
   }

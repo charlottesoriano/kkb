@@ -1,8 +1,8 @@
 import 'package:KKB/components/global/bottom_navigation.dart';
 import 'package:KKB/const/icons.dart';
 import 'package:KKB/const/colors.dart';
-import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
+import 'package:KKB/providers/global/notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,14 +29,18 @@ class _AppNavigationState extends ConsumerState<AppNavigation> with WidgetsBindi
     });
   }
 
-  void _initializedUserData() {
-    ref.read(userGroupsProvider.notifier).fetchUserGroups();
+  Future<void> _initializedUserData() async {
+    // ref.read(userGroupsProvider.notifier).fetchUserGroups();
+    // ref.read(notificationsProvider.notifier).fetchUserNotifications();
+    await Future.wait([
+      ref.read(userGroupsProvider.notifier).fetchUserGroups(),
+      ref.read(notificationsProvider.notifier).fetchUserNotifications(),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ref.watch(preferredModeProvider) == 'dark';
-    final background = isDark ? KKBColors.darkBackground : KKBColors.lightBackground;
+    final background = KKBColors.lightBackground;
 
     return Scaffold(
       backgroundColor: background,

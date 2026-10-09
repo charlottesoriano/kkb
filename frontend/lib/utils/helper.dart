@@ -1,16 +1,66 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
+import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/models/expense.dart';
-import 'package:flutter/foundation.dart';
+import 'package:KKB/models/user.dart';
+import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
+/// The kind of write that failed, so a database error can say what didn't happen.
+enum DbAction { insert, update, delete }
+
 class Helper {
   Helper._();
+
+  static const networkErrorMessage = 'Network error. Please check your connection and try again.';
+  static const duplicateErrorMessage = 'This entry already exists.';
+  static const unexpectedErrorMessage = 'Something went wrong. Please try again.';
+
+  static String writeErrorMessage(DbAction? action) => switch (action) {
+    DbAction.insert => 'Could not add this. Please try again.',
+    DbAction.update => 'Could not save your changes. Please try again.',
+    DbAction.delete => 'Could not delete this. Please try again.',
+    null            => 'Could not save your changes. Please try again.',
+  };
+
+  /// Maps a raw error message (from [error]/[describe] or the backend) to one the user can understand.
+  /// The backend rethrows Supabase/Postgres errors as-is, so these are matched by their message text.
+  static String friendlyError(String? raw, {DbAction? action}) {
+    if (raw == null || raw.trim().isEmpty) return unexpectedErrorMessage;
+    final msg = raw.toLowerCase();
+    bool has(List<String> keys) => keys.any(msg.contains);
+
+    // client side (describe) + backend failing to reach Supabase (node fetch)
+    if (has(['no internet', 'timed out', 'could not reach', 'network', 'socket', 'connection refused', 'connection reset', 'failed host lookup', 'fetch failed', 'econnrefused', 'enotfound', 'etimedout'])) {
+      return networkErrorMessage;
+    }
+    // postgres 23505 unique_violation, plus "User is already a member of the group"
+    if (has(['duplicate key', 'already exists', 'already a member'])) return duplicateErrorMessage;
+    // postgres foreign key / not-null / check / RLS violations, bad uuid/number input,
+    // and ValidationPipe / GraphQL variable validation failures
+    if (has(['violates', 'invalid input syntax', 'bad request exception', 'got invalid value', 'out of range'])) {
+      return writeErrorMessage(action ?? _actionFromMessage(msg));
+    }
+    return unexpectedErrorMessage;
+  }
+
+  // postgres FK messages name the operation: "insert or update on table ..." / "update or delete on table ..."
+  static DbAction? _actionFromMessage(String msg) {
+    if (msg.contains('update or delete')) return DbAction.delete;
+    if (msg.contains('insert or update')) return DbAction.insert;
+    return null;
+  }
+
+  /// Shows [raw] as a friendly error snackbar on the nearest [Scaffold]; the raw message is still logged.
+  static void showErrorSnackBar(BuildContext context, String? raw, {DbAction? action}) {
+    if (!context.mounted) return;
+    debugPrint('Error: $raw');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyError(raw, action: action)), backgroundColor: KKBColors.lightTextError));
+  }
 
   /// Turns any error object into a readable message.
   static String describe(Object e) => switch (e) {
@@ -30,8 +80,7 @@ class Helper {
   static Future<ResponseStatus> guard(Future<ResponseStatus> Function() call) async {
     try {
       return await call();
-    } catch (e, stack) {
-      debugPrint('---> Helper.guard caught: $e\n$stack');
+    } catch (e) {
       return ResponseStatus(message: describe(e), status: false, body: {});
     }
   }
@@ -73,5 +122,18 @@ class Helper {
   static double getUserBalance(Expense expense, String userId) {
     final userShare = expense.splits.where((split) => split.user.id == userId).fold<double>(0, (sum, split) => sum + split.amount);
     return expense.paidBy.id == userId ? expense.amount - userShare : -userShare;
+  }
+
+  // parse a user from a graphql response; deleted users come back with null email, names and image, so every field falls back
+  static User parseUser(Map<String, dynamic>? data) {
+    return User(
+      id: data?['id'] ?? '',
+      email: data?['email'] ?? '',
+      displayName: data?['display_name'] ?? '',
+      firstName: data?['first_name'] ?? '',
+      lastName: data?['last_name'] ?? '',
+      imageUrl: data?['image_url'] ?? '',
+      createdAt: data?['created_at'] ?? '',
+    );
   }
 }

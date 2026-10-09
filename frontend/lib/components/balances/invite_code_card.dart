@@ -1,4 +1,5 @@
-import 'package:KKB/components/balances/balances_shared.dart';
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +12,14 @@ class InviteCodeCard extends StatelessWidget {
   final String inviteCode;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: balanceCardDecoration(),
+  Widget build(BuildContext context) {    
+
+  Future<void> copyInviteCode(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: inviteCode));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite code copied')));
+  }
+    return KKBCard(
       child: Row(
         children: [
           Expanded(
@@ -27,20 +32,9 @@ class InviteCodeCard extends StatelessWidget {
               ],
             ),
           ),
-          OutlinedButton.icon(
-            onPressed: () => _copyInviteCode(context),
-            icon: const Icon(Icons.copy_rounded, size: 16),
-            label: Text('Copy', style: KKBTextStyles.buttonSmall),
-            style: balanceOutlinedButtonStyle(),
-          ),
+          KKBButton(label: 'Copy', icon: Icons.copy_rounded, isOutlined: true, size: KKBButtonSize.small, onPressed: () => copyInviteCode(context)),
         ],
       ),
     );
-  }
-
-  Future<void> _copyInviteCode(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: inviteCode));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite code copied')));
   }
 }

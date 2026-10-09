@@ -23,17 +23,17 @@ export class UserFavoritesResolver {
   }
 
   @Query(() => UserFavorite, { name: 'userFavorite' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
-    return this.userFavoritesService.findOne(id);
+  findOne(@Args('id', { type: () => Int }) id: number, @CurrentUser() userId: string) {
+    return this.userFavoritesService.findOne(id, userId);
   }
 
   @Mutation(() => UserFavorite)
-  updateUserFavorite(@Args('updateUserFavoriteInput') updateUserFavoriteInput: UpdateUserFavoriteInput) {
-    return this.userFavoritesService.update(updateUserFavoriteInput.id, updateUserFavoriteInput);
+  updateUserFavorite(@Args('updateUserFavoriteInput') updateUserFavoriteInput: UpdateUserFavoriteInput, @CurrentUser() userId: string) {
+    return this.userFavoritesService.update(updateUserFavoriteInput.id, updateUserFavoriteInput, userId);
   }
 
   @Mutation(() => UserFavorite)
-  removeUserFavorite(@Args('id', { type: () => Int }) id: number) {
-    return this.userFavoritesService.remove(id);
+  removeUserFavorite(@Args('id', { type: () => Int }) id: number, @CurrentUser() userId: string) {
+    return this.userFavoritesService.remove(id, userId);
   }
 }

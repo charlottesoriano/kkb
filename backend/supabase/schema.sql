@@ -74,6 +74,16 @@ create table user_favorites (
   unique (user_id, group_id)
 );
 
+create table notifications (
+  id          bigint generated always as identity primary key,
+  from_user   text not null references users(id),   -- who triggered it
+  to_user     text not null references users(id),   -- who receives it
+  title       text not null,
+  description text not null,
+  is_read     boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+
 
 create index on members (user_id);
 create index on expenses (group_id);
@@ -119,3 +129,4 @@ alter table settlements    enable row level security;
 alter table device_tokens  enable row level security;
 alter table users          enable row level security;
 alter table user_favorites  enable row level security;
+alter table notifications  enable row level security;

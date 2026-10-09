@@ -18,10 +18,7 @@ class UserGroups extends _$UserGroups {
 
   // parse a group from the graphql response
   Group _parseGroup(Map<String, dynamic> data) {
-    List<User> membersList = [];
-    for (var member in data['members'] ?? []) {
-      membersList.add(User(id: member['id'], email: member['email'], displayName: member['display_name'], firstName: member['first_name'], lastName: member['last_name'], imageUrl: member['image_url'], createdAt: member['created_at']));
-    }
+    final List<User> membersList = [for (final member in data['members'] ?? []) Helper.parseUser(member)];
     // creator may no longer be a member, so don't throw if not found
     User? createdBy = membersList.where((member) => member.id == data['created_by']).firstOrNull;
     return Group(id: data['id'], code: data['code'] ?? '', name: data['name'] ?? '', description: data['description'] ?? '', members: membersList, isFavorite: data['is_favorite'] ?? false, createdBy: createdBy, createdAt: data['created_at'] ?? '', avatarColor: data['avatar_color'] ?? '#984063');
@@ -50,6 +47,8 @@ class UserGroups extends _$UserGroups {
       )
     );
 
+    print('----------> result: ${result}');
+
     if (result.hasException) {
       return ResponseStatus(message: Helper.error(result), status: false, body: {});
       // throw Exception(Helper.error(result));
@@ -66,8 +65,9 @@ class UserGroups extends _$UserGroups {
       MutationOptions(
         document: gql(r'''
           mutation AddMemberToGroup($groupCode: String!) {
-            addMemberToGroup(groupCode: $groupCode) { 
+            addMemberToGroup(groupCode: $groupCode) {
               id
+              code
               name
               description
               members {
@@ -110,7 +110,6 @@ class UserGroups extends _$UserGroups {
   });
 
   Future<void> fetchUserGroups() => Helper.guard(() async {
-    // print('----> fetchUserGroups');
     final client = ref.read(graphqlClientProvider);
     final result = await client.query(
       QueryOptions(
@@ -142,32 +141,26 @@ class UserGroups extends _$UserGroups {
       )
     );
 
-    // print('----> result: ${result.data}');
 
     if (result.hasException) {
-      // print('----> result.hasException: ${Helper.error(result)}');
       return ResponseStatus(message: Helper.error(result), status: false, body: {});
       // throw Exception(Helper.error(result));
     }
 
     if (result.data == null) {
-      // print('----> result.data is null');
       return ResponseStatus(message: 'No groups found', status: false, body: {});
     }
 
-    // print('----> result.data is not null');
 
     final List<dynamic> userGroups = result.data?['userGroups'] ?? [];
-    // print('----> userGroups: $userGroups');
     List<Group> groups = userGroups.map((group) => _parseGroup(group)).toList();
-    // print('----> groups: $groups');
 
     //order groups by created_at descending
     groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    // print('----> groups sorted: $groups');
-    //if there is no selected group, set the first group as selected
-    if(groups.isNotEmpty) setSelectedGroup(groups.first);
-    // print('----> setSelectedGroup: ${groups.first}');
+    //the selected group is a copy, swap in the fresh one so new members show up
+    for (final group in groups) {
+      ref.read(selectedGroupProvider.notifier).syncGroup(group);
+    }
 
     state = groups;
 
@@ -205,12 +198,5 @@ class UserGroups extends _$UserGroups {
     //use the server's status, or roll back if the request failed
     _setFavorite(groupId, response.status ? response.body as bool : previous);
     return response;
-  }
-
-  void setSelectedGroup(Group group) {
-    Group? selectedGroup = ref.read(selectedGroupProvider);
-    if (selectedGroup == null) {
-      ref.read(selectedGroupProvider.notifier).setSelectedGroup(group);
-    }
   }
 }

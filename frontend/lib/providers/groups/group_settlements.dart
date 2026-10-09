@@ -19,18 +19,13 @@ class GroupSettlements extends _$GroupSettlements {
     return [];
   }
 
-  // parse a user from the graphql response
-  User parseUser(Map<String, dynamic> data) {
-    return User(id: data['id'], email: data['email'], displayName: data['display_name'], firstName: data['first_name'], lastName: data['last_name'], imageUrl: data['image_url'] ?? '', createdAt: data['created_at'] ?? '');
-  }
-
   // parse a settlement from the graphql response
   Settlement parseSettlement(Map<String, dynamic> data) {
     return Settlement(
       id: data['id'],
       groupId: data['group_id'],
-      fromUser: parseUser(data['from_user']),
-      toUser: parseUser(data['to_user']),
+      fromUser: Helper.parseUser(data['from_user']),
+      toUser: Helper.parseUser(data['to_user']),
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       status: data['status'] ?? 'unpaid',
       createdAt: DateTime.parse(data['created_at']),
@@ -245,5 +240,30 @@ class GroupSettlements extends _$GroupSettlements {
     await ref.read(groupBalancesProvider(groupId).notifier).fetchGroupBalances();
 
     return ResponseStatus(message: 'Settlement updated successfully', status: true, body: updated);
+  });
+
+  //asks a member to pay what they owe; the server saves it as a notification for them
+  Future<ResponseStatus> sendReminder(User toUser, double amount) => Helper.guard(() async {
+    final client = ref.read(graphqlClientProvider);
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(r'''
+          mutation SendReminder($input: SendReminderInput!) {
+            sendReminder(sendReminderInput: $input) {
+              id
+            }
+          }
+        '''),
+        variables: {
+          "input": {"group_id": groupId, "to_user": toUser.id, "amount": amount},
+        },
+      )
+    );
+
+    if (result.hasException) {
+      return ResponseStatus(message: Helper.error(result), status: false, body: {});
+    }
+
+    return ResponseStatus(message: 'Reminder sent to ${toUser.firstName}', status: true, body: {});
   });
 }

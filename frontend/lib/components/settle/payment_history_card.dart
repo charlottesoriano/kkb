@@ -1,5 +1,7 @@
+import 'package:KKB/components/global/card.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:KKB/components/global/empty_state.dart';
-import 'package:KKB/components/settle/settle_shared.dart';
+import 'package:KKB/components/global/status_chip.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/settlement.dart';
 import 'package:KKB/models/user.dart';
@@ -33,7 +35,8 @@ class _PaymentHistoryCardState extends ConsumerState<PaymentHistoryCard> {
       spacing: 10,
       children: [
         Text('Payment history', style: KKBTextStyles.titleSmall.copyWith(color: KKBColors.lightTextPrimary)),
-        SettleCard(
+        KKBCard(
+          hasShadow: true,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: settlements.isEmpty
               ? const KKBEmptyState(title: 'No payments yet', subtitle: 'Recorded payments will show up here.')
@@ -60,13 +63,6 @@ class _HistoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, background, foreground) = switch (settlement.status) {
-      'paid' => ('Paid', KKBColors.lightOwedBackground, KKBColors.lightOwed),
-      'pending' => ('Pending', KKBColors.lightChip, KKBColors.lightTextPrimary),
-      'rejected' => ('Rejected', KKBColors.lightOweBackground, KKBColors.lightOwe),
-      _ => ('Unpaid', KKBColors.lightSurfaceVariant, KKBColors.lightTextSecondary),
-    };
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -90,8 +86,8 @@ class _HistoryRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             spacing: 2,
             children: [
-              Text(settleCurrency.format(settlement.amount), style: KKBTextStyles.bodyLargeXBold.copyWith(color: KKBColors.lightTextPrimary)),
-              SettlePill(label: label, background: background, foreground: foreground),
+              Text(Helper.currency.format(settlement.amount), style: KKBTextStyles.bodyLargeXBold.copyWith(color: KKBColors.lightTextPrimary)),
+              StatusChip.settlement(settlement.status, size: StatusChipSize.small),
             ],
           ),
         ],

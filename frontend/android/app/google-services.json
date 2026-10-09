@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "607726452060",
+    "project_id": "kkbp-97108",
+    "storage_bucket": "kkbp-97108.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607726452060:android:d21922c9643bfe76d95599",
+        "android_client_info": {
+          "package_name": "com.charlotte.kkb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCM1OIYSg4A4KpRyi0P7XhezrkHxYffLoI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -7,5 +7,5 @@ final clerkProvider = Provider<ClerkAuthState>((ref) => throw UnimplementedError
 
 // Builds AuthService using that Clerk object.
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(ref.read(clerkProvider));
+  return AuthService(ref.read(clerkProvider), ref);
 });

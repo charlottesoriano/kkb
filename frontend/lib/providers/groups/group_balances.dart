@@ -1,6 +1,5 @@
 import 'package:KKB/models/balance.dart';
 import 'package:KKB/models/response_status.dart';
-import 'package:KKB/models/user.dart';
 import 'package:KKB/providers/global/graphql_client.dart';
 import 'package:KKB/utils/helper.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -51,7 +50,7 @@ class GroupBalances extends _$GroupBalances {
     final data = result.data?['groupBalances'] as List? ?? [];
     final balances = data
         .map<Balance>((b) => Balance(
-              user: User.fromJson(b['user']),
+              user: Helper.parseUser(b['user']),
               groupId: groupId,
               amount: (b['balance'] as num).toDouble(),
             ))

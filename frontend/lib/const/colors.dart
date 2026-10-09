@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 class KKBColors {
   KKBColors._();
 
-  // ───────────────────────── LIGHT ─────────────────────────
-
   // Backgrounds & surfaces
   static const Color lightBackground = Color(0xFFFFF6F2);
   static const Color lightSurface = Color(0xFFFFFFFF);
@@ -50,48 +48,4 @@ class KKBColors {
   //Texts
   static const Color lightTextError = Color(0xFFB3223F);
   static const Color lightTextSuccess = Color(0xFF166B48);
-
-  // ───────────────────────── DARK ─────────────────────────
-
-  // Backgrounds & surfaces
-  static const Color darkBackground = Color(0xFF1F2940);
-  static const Color darkSurface = Color(0xFF2A3A52);
-  static const Color darkSurfaceVariant = Color(0xFF33445F);
-  static const Color darkBorder = Color(0xFF3D4F6C);
-  static const Color darkScrim = Color(0x9E0E1220);
-
-  // Text
-  static const Color darkTextPrimary = Color(0xFFFFF3EE);
-  static const Color darkTextSecondary = Color(0xFFAEB6CE);
-  static const Color darkLink = Color(0xFFFE9677); // active nav item, text links
-
-  // Brand
-  static const Color darkPrimary = Color(0xFFF64668);
-  static const Color darkOnPrimary = Color(0xFF17161F);
-  static const Color darkHero = Color(0xFF41436A); // balance header card
-  static const Color darkOnHero = Color(0xFFFFFFFF);
-  static const Color darkChip = Color(0xFF41436A);
-  static const Color darkNotificationDot = Color(0xFFF64668);
-
-  // Owe / owed status
-  static const Color darkOwed = Color(0xFF6FD9A6); // owed to you
-  static const Color darkOwedBackground = Color(0xFF264A4A);
-  static const Color darkOwe = Color(0xFFFF8CA0); // you owe
-  static const Color darkOweBackground = Color(0xFF4A2F46);
-
-  // Category / chart colors
-  static const Color darkCategory1 = Color(0xFF7D80C2); // Stay
-  static const Color darkCategory2 = Color(0xFFC45E8A); // Food
-  static const Color darkCategory3 = Color(0xFFF64668); // Activities
-  static const Color darkCategory4 = Color(0xFFFE9677); // Transport
-
-  // Member avatars
-  static const Color darkAvatar1 = Color(0xFF984063);
-  static const Color darkOnAvatar1 = Color(0xFFFFFFFF);
-  static const Color darkAvatar2 = Color(0xFFFE9677);
-  static const Color darkOnAvatar2 = Color(0xFF232A45);
-  static const Color darkAvatar3 = Color(0xFFF64668);
-  static const Color darkOnAvatar3 = Color(0xFF17161F);
-  static const Color darkAvatar4 = Color(0xFF41436A);
-  static const Color darkOnAvatar4 = Color(0xFFFFFFFF);
 }

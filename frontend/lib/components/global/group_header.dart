@@ -1,5 +1,6 @@
 import 'package:KKB/components/global/group_header_bell.dart';
 import 'package:KKB/components/global/group_header_card.dart';
+import 'package:KKB/components/notification/index.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,7 @@ class KKBGroupHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool hasNotifications;
   // e.g. open the group switcher
   final VoidCallback? onTapGroup;
+  // defaults to opening the notifications screen
   final VoidCallback? onTapNotifications;
 
   @override
@@ -31,9 +33,13 @@ class KKBGroupHeader extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Flexible(child: GroupHeaderCard()),
+          Flexible(child: GroupHeaderCard(onTap: onTapGroup)),
           const SizedBox(width: 12),
-          GroupHeaderBell(hasNotifications: hasNotifications, onTap: onTapNotifications),
+          GroupHeaderBell(
+            hasNotifications: hasNotifications,
+            // root navigator so the screen covers the bottom navigation
+            onTap: onTapNotifications ?? () => Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (context) => const NotificationIndex())),
+          ),
         ],
       ),
     );

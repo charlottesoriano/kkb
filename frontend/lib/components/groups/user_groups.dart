@@ -37,7 +37,7 @@ class _UserGroupsListState extends ConsumerState<UserGroupsList> {
   Future<void> _toggleFavorite(Group group) async {
     final result = await ref.read(userGroupsProvider.notifier).toggleFavorite(group.id);
     if (!result.status) {
-      if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Could not update favorites'), backgroundColor: KKBColors.lightTextError));
+      if (mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.update);
       return;
     }
     widget.onToggleFavorite?.call(group, result.body as bool);

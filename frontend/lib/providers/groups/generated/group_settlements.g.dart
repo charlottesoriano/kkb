@@ -58,7 +58,7 @@ final class GroupSettlementsProvider
   }
 }
 
-String _$groupSettlementsHash() => r'44a44cadce1cc3af958fc38d448fb4616aa61757';
+String _$groupSettlementsHash() => r'ae4bf3154126e1e44e4f01cc045c21c23cbd0ed7';
 
 final class GroupSettlementsFamily extends $Family
     with

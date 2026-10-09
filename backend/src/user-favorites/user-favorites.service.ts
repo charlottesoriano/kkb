@@ -12,7 +12,9 @@ export class UserFavoritesService {
   async create(createUserFavoriteInput: CreateUserFavoriteInput, userId: string) {
     const { data, error } = await this.db
       .from('user_favorites')
-      .insert({ ...createUserFavoriteInput, user_id: userId });
+      .insert({ ...createUserFavoriteInput, user_id: userId })
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }
@@ -26,29 +28,37 @@ export class UserFavoritesService {
     return data;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, userId: string) {
     const { data, error } = await this.db
       .from('user_favorites')
       .select('*')
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single();
     if (error) throw error;
     return data;
   }
 
-  async update(id: number, updateUserFavoriteInput: UpdateUserFavoriteInput) {
+  async update(id: number, updateUserFavoriteInput: UpdateUserFavoriteInput, userId: string) {
     const { data, error } = await this.db
       .from('user_favorites')
       .update(updateUserFavoriteInput)
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: string) {
     const { data, error } = await this.db
       .from('user_favorites')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }
