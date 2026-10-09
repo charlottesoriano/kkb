@@ -24,6 +24,31 @@ export class NotificationsService {
     return data;
   }
 
+  //get user's notifications
+  async getUserNotifications(userId: string) {
+    const { data, error } = await this.db
+      .from('notifications')
+      .select(`
+        *,
+        from_user: users!notifications_from_user_fkey (
+          id,
+          display_name,
+          first_name,
+          last_name
+        ),
+        to_user: users!notifications_to_user_fkey (
+          id,
+          display_name,
+          first_name,
+          last_name
+        )
+      `)
+      .eq('to_user', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  }
+
   async sendReminder(fromUser: string, { group_id, to_user, amount }: SendReminderInput) {
     // the sender and group names go into the message, so the receiver knows who's asking and for which group
     const [{ data: sender, error: senderError }, { data: group, error: groupError }] = await Promise.all([

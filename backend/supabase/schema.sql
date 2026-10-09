@@ -80,6 +80,7 @@ create table notifications (
   to_user     text not null references users(id),   -- who receives it
   title       text not null,
   description text not null,
+  is_read     boolean not null default false,
   created_at  timestamptz not null default now()
 );
 

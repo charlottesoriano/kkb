@@ -4,6 +4,7 @@ import { UpdateGroupInput } from './dto/update-group.input.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE } from '../supabase/supabase.provider.js';
 import { randomInt } from 'crypto';
+import { createClerkClient } from '@clerk/backend';
 import { User } from '../users/entities/user.entity.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -46,7 +47,9 @@ export class GroupsService {
     const { data, error } = await this.db
       .from('groups')
       .insert({
-        ...input,
+        name: input.name,
+        description: input.description,
+        avatar_color: input.avatarColor,
         created_by: userId,
         code: code,
       })
@@ -174,7 +177,9 @@ export class GroupsService {
       .maybeSingle();
     if (memberError) throw memberError;
     if (member) throw new BadRequestException('User is already a member of the group');
-  
+
+    await this.ensureUserExists(userId);
+
     const { data: newMember, error: newMemberError } = await this.db
       .from('members')
       .insert({ group_id: group.id, user_id: userId })
@@ -188,6 +193,34 @@ export class GroupsService {
       created_at: new Date(group.created_at),
       members: groupMembers,
     };
+  }
+
+  //users rows normally come from the Clerk webhook; if it never arrived
+  //(backend offline at sign-up, db reset), copy the user from Clerk now so members_user_id_fkey holds
+  private async ensureUserExists(userId: string) {
+    const { data: existing, error } = await this.db
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (existing) return;
+
+    const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+    const u = await clerk.users.getUser(userId);
+    const { error: upsertError } = await this.db.from('users').upsert(
+      {
+        id: u.id,
+        email: u.primaryEmailAddress?.emailAddress ?? u.emailAddresses[0]?.emailAddress ?? null,
+        display_name: [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username,
+        first_name: u.firstName,
+        last_name: u.lastName,
+        image_url: u.imageUrl,
+        deleted_at: null,
+      },
+      { onConflict: 'id' },
+    );
+    if (upsertError) throw upsertError;
   }
 
   async favoriteGroup(groupId: number, userId: string) {

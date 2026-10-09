@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ClerkGuard } from '../auth/auth.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
@@ -19,5 +19,10 @@ export class NotificationsResolver {
   @Mutation(() => Boolean)
   registerDeviceToken(@Args('token') token: string, @CurrentUser() userId: string) {
     return this.notificationsService.registerDeviceToken(userId, token);
+  }
+
+  @Query(() => [Notification])
+  getUserNotifications(@CurrentUser() userId: string) {
+    return this.notificationsService.getUserNotifications(userId);
   }
 }
