@@ -90,7 +90,6 @@ class GroupExpenses extends _$GroupExpenses {
         )
       );
       
-      print('-----> expenses: ${result}');
       
       if (result.hasException) {
         return ResponseStatus(message: Helper.error(result), status: false, body: {});
@@ -103,8 +102,6 @@ class GroupExpenses extends _$GroupExpenses {
       
       return ResponseStatus(message: 'Expenses fetched successfully', status: true, body: expenses);
     } on Exception catch (e) {
-      // TODO
-      print('-----> expenses error: $e');
       return ResponseStatus(message: e.toString(), status: false, body: {});
     }
   });

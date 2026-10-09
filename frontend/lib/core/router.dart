@@ -1,6 +1,7 @@
 import 'package:KKB/components/expenses/add_expenses.dart';
 import 'package:KKB/components/expenses/index.dart';
 import 'package:KKB/components/navigation.dart';
+import 'package:KKB/components/notification/index.dart';
 import 'package:KKB/components/group_navigation.dart';
 import 'package:KKB/components/groups/index.dart';
 import 'package:KKB/components/balances/index.dart';
@@ -20,6 +21,9 @@ class AppRoutes {
   // main navigation
   static const groups = '/groups';
   static const settings = '/settings';
+
+  // full screen, pushed over either navigation
+  static const notifications = '/notifications';
 
   // group navigation (opened after selecting a group)
   static const groupBalances = '/group/balances';
@@ -65,6 +69,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const SigninIndex(),
+      ),
+
+      // top level, so it opens on the root navigator and hides the bottom navigation
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationIndex(),
       ),
 
       // main navigation: Groups / Settings

@@ -110,42 +110,49 @@ class _ExpensesIndexState extends ConsumerState<ExpensesIndex> {
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
       appBar: group == null ? null : KKBGroupHeader(hasNotifications: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Expenses', style: KKBTextStyles.headerXSmall.copyWith(color: KKBColors.lightTextPrimary)),
-            const SizedBox(height: 4),
-            Text('${expenses.length} expenses · ${Helper.currency.format(total)} total · tap one to see the split', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
-            const SizedBox(height: 16),
-            if (expenses.isEmpty)
-              _buildEmptyState()
-            else
-              Column(
-                spacing: 12,
-                children: [
-                  for (final expense in expenses)
-                    KKBTileCard(
-                      onTap: () => _onTap(expense.id),
-                      title: expense.description,
-                      // subtitle: '${Helper.currency.format(expense.amount)} · ${DateTime.parse(expense.createdAt).toLocal().toString()}',
-                      subtitle: 'Paid by ${expense.paidBy.displayName} · ${Helper.formatDate(expense.createdAt)}',
-                      leading: MemberAvatar(user: expense.paidBy, size: 40, colorIndex: MemberAvatar.colorIndexIn(group?.members ?? [], expense.paidBy.id)),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(Helper.currency.format(expense.amount), style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary)),
-                          _buildUserBalance(expense),
-                        ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          if (group != null) await ref.read(selectedGroupProvider.notifier).fetchGroupData(group);
+        },
+        child: SingleChildScrollView(
+          // lets pull-to-refresh work even when the content is shorter than the screen
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Expenses', style: KKBTextStyles.headerXSmall.copyWith(color: KKBColors.lightTextPrimary)),
+              const SizedBox(height: 4),
+              Text('${expenses.length} expenses · ${Helper.currency.format(total)} total · tap one to see the split', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
+              const SizedBox(height: 16),
+              if (expenses.isEmpty)
+                _buildEmptyState()
+              else
+                Column(
+                  spacing: 12,
+                  children: [
+                    for (final expense in expenses)
+                      KKBTileCard(
+                        onTap: () => _onTap(expense.id),
+                        title: expense.description,
+                        // subtitle: '${Helper.currency.format(expense.amount)} · ${DateTime.parse(expense.createdAt).toLocal().toString()}',
+                        subtitle: 'Paid by ${expense.paidBy.displayName} · ${Helper.formatDate(expense.createdAt)}',
+                        leading: MemberAvatar(user: expense.paidBy, size: 40, colorIndex: MemberAvatar.colorIndexIn(group?.members ?? [], expense.paidBy.id)),
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(Helper.currency.format(expense.amount), style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary)),
+                            _buildUserBalance(expense),
+                          ],
+                        ),
+                        children: [if (_expandedId == expense.id) ..._buildSplits(expense)],
                       ),
-                      children: [if (_expandedId == expense.id) ..._buildSplits(expense)],
-                    ),
-                ],
-              ),
-          ],
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: SafeArea(

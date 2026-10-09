@@ -110,7 +110,6 @@ class UserGroups extends _$UserGroups {
   });
 
   Future<void> fetchUserGroups() => Helper.guard(() async {
-    // print('----> fetchUserGroups');
     final client = ref.read(graphqlClientProvider);
     final result = await client.query(
       QueryOptions(
@@ -142,32 +141,28 @@ class UserGroups extends _$UserGroups {
       )
     );
 
-    // print('----> result: ${result.data}');
 
     if (result.hasException) {
-      // print('----> result.hasException: ${Helper.error(result)}');
       return ResponseStatus(message: Helper.error(result), status: false, body: {});
       // throw Exception(Helper.error(result));
     }
 
     if (result.data == null) {
-      // print('----> result.data is null');
       return ResponseStatus(message: 'No groups found', status: false, body: {});
     }
 
-    // print('----> result.data is not null');
 
     final List<dynamic> userGroups = result.data?['userGroups'] ?? [];
-    // print('----> userGroups: $userGroups');
     List<Group> groups = userGroups.map((group) => _parseGroup(group)).toList();
-    // print('----> groups: $groups');
 
     //order groups by created_at descending
     groups.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    // print('----> groups sorted: $groups');
     //if there is no selected group, set the first group as selected
     if(groups.isNotEmpty) setSelectedGroup(groups.first);
-    // print('----> setSelectedGroup: ${groups.first}');
+    //the selected group is a copy, swap in the fresh one so new members show up
+    for (final group in groups) {
+      ref.read(selectedGroupProvider.notifier).syncGroup(group);
+    }
 
     state = groups;
 

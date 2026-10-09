@@ -11,7 +11,13 @@ class InviteCodeCard extends StatelessWidget {
   final String inviteCode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
+
+  Future<void> copyInviteCode(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: inviteCode));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite code copied')));
+  }
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: balanceCardDecoration(),
@@ -28,7 +34,7 @@ class InviteCodeCard extends StatelessWidget {
             ),
           ),
           OutlinedButton.icon(
-            onPressed: () => _copyInviteCode(context),
+            onPressed: () => copyInviteCode(context),
             icon: const Icon(Icons.copy_rounded, size: 16),
             label: Text('Copy', style: KKBTextStyles.buttonSmall),
             style: balanceOutlinedButtonStyle(),
@@ -36,11 +42,5 @@ class InviteCodeCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _copyInviteCode(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: inviteCode));
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite code copied')));
   }
 }

@@ -26,7 +26,6 @@ Future<void> main() async {
   );
 
   try {
-    print('------> Initializing Firebase');
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     FirebaseMessaging.onBackgroundMessage(firebaseBackgroundHandler);
   } catch (e) {

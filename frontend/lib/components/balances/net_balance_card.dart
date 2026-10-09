@@ -19,7 +19,18 @@ class NetBalanceCard extends StatelessWidget {
       > 0 => "You're owed overall",
       < 0 => 'You owe overall',
       _ => 'All settled up',
-    };
+    };    
+
+    Widget buildHeroChip(String label) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: KKBColors.lightOnHero.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightOnHero)),
+      );
+    }
 
     return Container(
       width: double.infinity,
@@ -74,8 +85,8 @@ class NetBalanceCard extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildHeroChip('Owed to you ${balanceCurrency.format(owedToYou)}'),
-                    _buildHeroChip('You owe ${balanceCurrency.format(youOwe)}'),
+                    buildHeroChip('Owed to you ${balanceCurrency.format(owedToYou)}'),
+                    buildHeroChip('You owe ${balanceCurrency.format(youOwe)}'),
                   ],
                 ),
               ],
@@ -83,17 +94,6 @@ class NetBalanceCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildHeroChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: KKBColors.lightOnHero.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightOnHero)),
     );
   }
 }

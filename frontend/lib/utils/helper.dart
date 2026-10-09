@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/models/expense.dart';
+import 'package:KKB/models/user.dart';
 import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -30,8 +31,7 @@ class Helper {
   static Future<ResponseStatus> guard(Future<ResponseStatus> Function() call) async {
     try {
       return await call();
-    } catch (e, stack) {
-      debugPrint('---> Helper.guard caught: $e\n$stack');
+    } catch (e) {
       return ResponseStatus(message: describe(e), status: false, body: {});
     }
   }
@@ -73,5 +73,9 @@ class Helper {
   static double getUserBalance(Expense expense, String userId) {
     final userShare = expense.splits.where((split) => split.user.id == userId).fold<double>(0, (sum, split) => sum + split.amount);
     return expense.paidBy.id == userId ? expense.amount - userShare : -userShare;
+  }
+
+  static User parseUser(Map<String, dynamic>? data) {
+    return User(id: data?['id'] ?? '', email: data?['email'] ?? '', displayName: data?['display_name'] ?? '', firstName: data?['first_name'] ?? '', lastName: data?['last_name'] ?? '');
   }
 }

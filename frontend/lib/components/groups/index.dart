@@ -4,6 +4,7 @@ import 'package:KKB/components/groups/favorite_groups.dart';
 import 'package:KKB/components/global/dashed_button.dart';
 import 'package:KKB/components/global/text_field.dart';
 import 'package:KKB/components/groups/user_groups.dart';
+import 'package:KKB/const/colors.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/models/group.dart';
 import 'package:KKB/providers/auth/current_user.dart';
@@ -21,6 +22,7 @@ class GroupsIndex extends ConsumerStatefulWidget {
 }
 
 class _MGroupsIndexState extends ConsumerState<GroupsIndex> {
+  String _searchQuery = '';
 
   // select the group and open the group navigation
   void _openGroup(Group group) {
@@ -30,7 +32,11 @@ class _MGroupsIndexState extends ConsumerState<GroupsIndex> {
 
   @override
   Widget build(BuildContext context) {
-    List<Group> groups = ref.watch(userGroupsProvider);
+    // filter by group name when the user is searching
+    final String query = _searchQuery.trim().toLowerCase();
+    List<Group> groups = ref.watch(userGroupsProvider)
+        .where((group) => query.isEmpty || group.name.toLowerCase().contains(query))
+        .toList();
     List<Group> favoriteGroups = groups.where((group) => group.isFavorite).toList();
     final String? userId = ref.watch(currentUserProvider)?.id;
     List<Group> createdByUserGroups = groups.where((group) => group.createdBy?.id == userId).toList();
@@ -41,31 +47,37 @@ class _MGroupsIndexState extends ConsumerState<GroupsIndex> {
         preferredSize: const Size.fromHeight(GroupsHeader.toolbarHeightForTwoLineTitle),
         child: GroupsHeader(onAddGroup: () => showJoinCreateGroupPanel(context)),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              //search bar
-              Column(
-                children: [
-                  KKBTextField(
-                    hintText: 'Search groups',
-                    prefixIcon: Icon(Icons.search),
-                    onChanged: (value) {
-                      
-                    },
-                  ),
+      body: RefreshIndicator(
+        color: KKBColors.lightPrimary,
+        onRefresh: () => ref.read(userGroupsProvider.notifier).fetchUserGroups(),
+        child: SingleChildScrollView(
+          // always scrollable so pull to refresh works even when the list is short
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                //search bar
+                Column(
+                  children: [
+                    KKBTextField(
+                      hintText: 'Search groups',
+                      prefixIcon: Icon(Icons.search),
+                      // built-in clear button, only shown while there's text
+                      clearable: true,
+                      onChanged: (value) => setState(() => _searchQuery = value),
+                    ),
                   
-                  FavoriteGroupsList(groups: favoriteGroups, onTap: _openGroup),
-                  UserGroupsList(groups: createdByUserGroups, byUser: true, onTap: _openGroup),
-                  UserGroupsList(groups: joinedGroups, byUser: false, onTap: _openGroup),
+                    FavoriteGroupsList(groups: favoriteGroups, onTap: _openGroup),
+                    UserGroupsList(groups: createdByUserGroups, byUser: true, onTap: _openGroup),
+                    UserGroupsList(groups: joinedGroups, byUser: false, onTap: _openGroup),
                   
-                  // const SizedBox(height: 16),
-                  // KKBLabel(title: 'Joined groups', subtitle: 'Created by others • 3'),
-                ],
-              ),
-            ],
+                    // const SizedBox(height: 16),
+                    // KKBLabel(title: 'Joined groups', subtitle: 'Created by others • 3'),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

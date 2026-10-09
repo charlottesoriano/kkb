@@ -13,7 +13,8 @@ enum KKBInputType { text, email, number, password, search }
 ///
 /// - [prefixIcon] / [suffixIcon]: pass any widget, or leave null for none.
 ///   (Search gets a default magnifier + clear button, password gets a default
-///   show/hide button. Set [useDefaultIcons] to false to turn those off.)
+///   show/hide button. Set [useDefaultIcons] to false to turn those off.
+///   Set [clearable] to show the clear button on any other type.)
 /// - [hintText]: placeholder, fully dynamic.
 /// - [type]: text, email, number, password or search.
 /// - Light/dark colors are picked automatically from the current theme.
@@ -31,6 +32,7 @@ class KKBTextField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.useDefaultIcons = true,
+    this.clearable = false,
     this.onChanged,
     this.onSubmitted,
     this.onTap,
@@ -77,6 +79,9 @@ class KKBTextField extends StatefulWidget {
 
   /// When true: search shows magnifier + clear, password shows the eye toggle.
   final bool useDefaultIcons;
+
+  /// Shows a clear (x) button while the field has text. Always on for search.
+  final bool clearable;
 
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -202,7 +207,7 @@ class _KKBTextFieldState extends State<KKBTextField> {
         ),
       );
     }
-    if (_isSearch && _controller.text.isNotEmpty) {
+    if ((_isSearch || widget.clearable) && _controller.text.isNotEmpty) {
       return IconButton(
         tooltip: 'Clear',
         onPressed: () {
@@ -252,6 +257,8 @@ class _KKBTextFieldState extends State<KKBTextField> {
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onSubmitted,
       onTap: widget.onTap,
+      // drop focus (and close the keyboard) when tapping anywhere outside the field
+      onTapOutside: (_) => FocusScope.of(context).unfocus(),
       cursorColor: p.focus,
       textAlign: widget.textAlign,
       style: (widget.textStyle ?? KKBTextStyles.bodyLarge).copyWith(

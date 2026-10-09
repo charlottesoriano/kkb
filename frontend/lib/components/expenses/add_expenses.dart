@@ -9,7 +9,6 @@ import 'package:KKB/components/global/title.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/expense_input.dart';
 import 'package:KKB/models/expense_split_input.dart';
-import 'package:KKB/models/group.dart';
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/models/user.dart';
 import 'package:KKB/providers/auth/current_user.dart';
@@ -118,16 +117,9 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   @override
   Widget build(BuildContext context) {
     final userId = ref.watch(currentUserProvider)?.id;
-    Group? group = ref.watch(selectedGroupProvider);
 
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
-      // appBar: group != null
-      //     ? KKBGroupHeader(
-      //         group: group,
-      //         onTapGroup: () => context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses),
-      //       )
-      //     : null,
       appBar: KKBGroupHeader(onTapGroup: () => context.go(AppRoutes.groupExpenses)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
