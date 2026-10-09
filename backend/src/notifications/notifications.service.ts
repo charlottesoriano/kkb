@@ -4,6 +4,10 @@ import { SUPABASE } from '../supabase/supabase.provider.js';
 import { SendReminderInput } from './dto/send-reminder.input.js';
 import { Messaging } from 'firebase-admin/messaging';
 import { FIREBASE_MESSAGING } from './firebase.provider.js';
+import { assertMember } from '../auth/membership.js';
+
+// 1234.5 -> ₱1,234.50
+export const peso = (amount: number) => Number(amount).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
 
 @Injectable()
 export class NotificationsService {
@@ -50,6 +54,10 @@ export class NotificationsService {
   }
 
   async sendReminder(fromUser: string, { group_id, to_user, amount }: SendReminderInput) {
+    // both people have to be in the group, so reminders can't be sent to strangers
+    await assertMember(this.db, group_id, fromUser);
+    await assertMember(this.db, group_id, to_user);
+
     // the sender and group names go into the message, so the receiver knows who's asking and for which group
     const [{ data: sender, error: senderError }, { data: group, error: groupError }] = await Promise.all([
       this.db.from('users').select('first_name, display_name').eq('id', fromUser).single(),
@@ -58,20 +66,30 @@ export class NotificationsService {
     if (senderError) throw senderError;
     if (groupError) throw groupError;
 
-    const amountText = amount.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
-    await this.push(to_user, 'Payment reminder', `${sender.first_name ?? sender.display_name} reminded you to pay ${amountText} in ${group.name}`);
+    // create() saves the notification and pushes it to the receiver's devices
     return this.create(
       fromUser,
       to_user,
       'Payment reminder',
-      `${sender.first_name ?? sender.display_name} reminded you to pay ${amountText} in ${group.name}`,
+      `${sender.first_name ?? sender.display_name} reminded you to pay ${peso(amount)} in ${group.name}`,
     );
   }
 
   async registerDeviceToken(userId: string, token: string) {
+    // a device belongs to whoever signed in last, so the previous account stops getting pushes on it
+    const { error: claimError } = await this.db.from('device_tokens').delete().eq('token', token).neq('user_id', userId);
+    if (claimError) throw claimError;
+
     const { error } = await this.db
       .from('device_tokens')
       .upsert({ user_id: userId, token, updated_at: new Date().toISOString() }, { onConflict: 'user_id,token' });
+    if (error) throw error;
+    return true;
+  }
+
+  // called on sign out, so the device stops getting this user's notifications
+  async unregisterDeviceToken(userId: string, token: string) {
+    const { error } = await this.db.from('device_tokens').delete().eq('user_id', userId).eq('token', token);
     if (error) throw error;
     return true;
   }

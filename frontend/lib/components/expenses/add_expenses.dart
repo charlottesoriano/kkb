@@ -1,3 +1,5 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/section_label.dart';
 import 'package:KKB/components/expenses/add_expense_shared.dart';
 import 'package:KKB/components/expenses/custom_split.dart';
 import 'package:KKB/components/expenses/equal_split.dart';
@@ -38,7 +40,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   SplitType _splitType = SplitType.equal;
   String? _paidById;
   // blocks double taps while the expense is being saved
-  bool _submitting = false;
+  bool submitting = false;
 
   // members ticked in "Split between" (the payer included)
   late final Set<String> _selectedIds;
@@ -52,6 +54,19 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
   double get _amount => double.tryParse(_amountController.text) ?? 0;
 
   double get _equalShare => _splitMembers.isEmpty ? 0 : _amount / _splitMembers.length;
+
+  // the bill split in whole centavos, with the leftover centavos going to the first members,
+  // so the shares always add up to the amount (₱100 / 3 -> 33.34, 33.33, 33.33)
+  Map<String, double> _equalShares() {
+    final members = _splitMembers;
+    if (members.isEmpty) return {};
+    final cents = (_amount * 100).round();
+    final base = cents ~/ members.length;
+    final extra = cents % members.length;
+    return {
+      for (final (i, m) in members.indexed) m.id: (base + (i < extra ? 1 : 0)) / 100,
+    };
+  }
 
   double get _customTotal => _splitMembers.fold(0, (sum, m) => sum + (double.tryParse(_customControllers[m.id]!.text) ?? 0));
 
@@ -87,13 +102,15 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  Future<void> submit() async {
     final group = ref.read(selectedGroupProvider);
     final paidById = _paidById;
     if (group == null || paidById == null) return;
 
     // member id -> their share of the bill (the payer's own share included)
-    final shares = {for (final m in _splitMembers) m.id: _splitType == SplitType.equal ? _equalShare : double.tryParse(_customControllers[m.id]!.text) ?? 0};
+    final shares = _splitType == SplitType.equal
+        ? _equalShares()
+        : {for (final m in _splitMembers) m.id: double.tryParse(_customControllers[m.id]!.text) ?? 0};
 
     // every member's share of the bill, stored as the expense's splits
     final splits = [
@@ -103,9 +120,9 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
 
     final expenseInput = ExpenseInput(groupId: group.id, paidBy: paidById, description: _descriptionController.text.trim(), amount: _amount, splits: splits);
 
-    setState(() => _submitting = true);
+    setState(() => submitting = true);
     ResponseStatus result = await ref.read(groupExpensesProvider.notifier).createExpense(expenseInput);
-    if (mounted) setState(() => _submitting = false);
+    if (mounted) setState(() => submitting = false);
 
     if (result.status) {
       if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Expense added successfully'), backgroundColor: KKBColors.lightTextSuccess));
@@ -121,7 +138,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
 
     return Scaffold(
       backgroundColor: KKBColors.lightBackground,
-      appBar: KKBGroupHeader(onTapGroup: () => context.go(AppRoutes.groupExpenses)),
+      appBar: KKBGroupHeader(onTapGroup: () => context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: Column(
@@ -132,12 +149,12 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
             ExpenseDetailsCard(descriptionController: _descriptionController, amountController: _amountController, onChanged: () => setState(() {})),
             const SizedBox(height: 20),
 
-            const ExpenseSectionLabel('Who paid?'),
+            const KKBSectionLabel('Who paid?'),
             const SizedBox(height: 10),
             WhoPaid(members: _members, paidById: _paidById, userId: userId, onSelect: (id) => setState(() => _paidById = id)),
             const SizedBox(height: 20),
 
-            const ExpenseSectionLabel('Split type'),
+            const KKBSectionLabel('Split type'),
             const SizedBox(height: 10),
             SplitTypeToggle(value: _splitType, onChanged: (type) => setState(() => _splitType = type)),
             const SizedBox(height: 20),
@@ -180,16 +197,10 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
               SizedBox(
                 width: double.infinity,
                 height: 56,
-                child: FilledButton(
-                  onPressed: _canSubmit && !_submitting ? _submit : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: KKBColors.lightPrimary,
-                    foregroundColor: KKBColors.lightOnPrimary,
-                    disabledBackgroundColor: KKBColors.lightPrimary.withValues(alpha: 0.4),
-                    disabledForegroundColor: KKBColors.lightOnPrimary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: Text('Add expense · ${expenseCurrency.format(_amount)}', style: KKBTextStyles.buttonLarge),
+                child: KKBButton(
+                  label: 'Add expense · ${Helper.currency.format(_amount)}',
+                  size: KKBButtonSize.large,
+                  onPressed: _canSubmit && !submitting ? submit : null,
                 ),
               ),
             ],

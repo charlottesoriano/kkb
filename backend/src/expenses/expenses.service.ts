@@ -4,6 +4,7 @@ import { UpdateExpenseInput } from './dto/update-expense.input.js';
 import { SUPABASE } from '../supabase/supabase.provider.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CreateExpenseSplitInput } from './dto/create-expense-split.input.js';
+import { assertMember } from '../auth/membership.js';
 
 const USER_COLUMNS = 'id, email, display_name, first_name, last_name, image_url, created_at';
 
@@ -17,6 +18,7 @@ export class ExpensesService {
     @Inject(SUPABASE) private db: SupabaseClient
   ) {}
   async create(expense: CreateExpenseInput, splits: CreateExpenseSplitInput[], userId: string) {
+    await assertMember(this.db, expense.group_id, userId);
     const { data, error } = await this.db
       .from('expenses')
       .insert({
@@ -48,7 +50,8 @@ export class ExpensesService {
     return this.findOne(data.id);
   }
 
-  async findAll(groupId: number) {
+  async findAll(groupId: number, userId: string) {
+    await assertMember(this.db, groupId, userId);
     const { data, error} = await this.db
       .from('expenses')
       .select(EXPENSE_SELECT)
@@ -69,7 +72,16 @@ export class ExpensesService {
     return data;
   }
 
-  async update(id: number, updateExpenseInput: UpdateExpenseInput) {
+  //only members of the expense's group can see or change it
+  async assertCanAccess(id: number, userId: string) {
+    const { data, error } = await this.db.from('expenses').select('group_id').eq('id', id).maybeSingle();
+    if (error) throw error;
+    if (!data) throw new NotFoundException('Expense not found');
+    await assertMember(this.db, data.group_id, userId);
+  }
+
+  async update(id: number, updateExpenseInput: UpdateExpenseInput, userId: string) {
+    await this.assertCanAccess(id, userId);
     const { data, error } = await this.db
       .from('expenses')
       .update({
@@ -83,7 +95,8 @@ export class ExpensesService {
     return data;
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: string) {
+    await this.assertCanAccess(id, userId);
     const { data, error } = await this.db
       .from('expenses')
       .delete()

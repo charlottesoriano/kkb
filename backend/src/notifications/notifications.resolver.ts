@@ -21,6 +21,11 @@ export class NotificationsResolver {
     return this.notificationsService.registerDeviceToken(userId, token);
   }
 
+  @Mutation(() => Boolean)
+  unregisterDeviceToken(@Args('token') token: string, @CurrentUser() userId: string) {
+    return this.notificationsService.unregisterDeviceToken(userId, token);
+  }
+
   @Query(() => [Notification])
   getUserNotifications(@CurrentUser() userId: string) {
     return this.notificationsService.getUserNotifications(userId);

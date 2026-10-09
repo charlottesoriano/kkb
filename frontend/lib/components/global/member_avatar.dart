@@ -5,7 +5,12 @@ import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
 
 class MemberAvatar extends StatelessWidget {
-  const MemberAvatar({super.key, required this.user, this.size = 32, this.colorIndex = 0, this.selected = false, this.bordered = false});
+  MemberAvatar({super.key, required User user, this.size = 32, this.colorIndex = 0, this.selected = false, this.bordered = false})
+      : name = '${user.firstName} ${user.lastName}',
+        imageUrl = user.imageUrl;
+
+  // for non-user avatars, e.g. a group
+  const MemberAvatar.named({super.key, required this.name, this.imageUrl = '', this.size = 32, this.colorIndex = 0, this.selected = false, this.bordered = false});
 
   static const colors = [
     (KKBColors.lightAvatar1, KKBColors.lightOnAvatar1),
@@ -20,7 +25,8 @@ class MemberAvatar extends StatelessWidget {
     return index < 0 ? 0 : index;
   }
 
-  final User user;
+  final String name;
+  final String imageUrl;
   final double size;
   final int colorIndex;
   // primary ring around the avatar, e.g. the selected payer
@@ -41,11 +47,11 @@ class MemberAvatar extends StatelessWidget {
         shape: BoxShape.circle,
         border: bordered ? Border.all(color: KKBColors.lightSurface, width: 2) : null,
       ),
-      child: user.imageUrl.isEmpty
+      child: imageUrl.isEmpty
           ? _initials(onAvatarColor)
           : ClipOval(
               child: Image.network(
-                user.imageUrl,
+                imageUrl,
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
@@ -69,6 +75,6 @@ class MemberAvatar extends StatelessWidget {
   }
 
   Widget _initials(Color color) {
-    return Text(Helper.initials('${user.firstName} ${user.lastName}'), style: (size >= 48 ? KKBTextStyles.bodyMediumXBold : KKBTextStyles.bodyXSmallBold).copyWith(color: color));
+    return Text(Helper.initials(name), style: (size >= 48 ? KKBTextStyles.bodyMediumXBold : KKBTextStyles.bodyXSmallBold).copyWith(color: color));
   }
 }

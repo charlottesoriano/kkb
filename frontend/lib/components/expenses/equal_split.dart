@@ -1,5 +1,8 @@
-import 'package:KKB/components/global/member_avatar.dart';
-import 'package:KKB/components/expenses/add_expense_shared.dart';
+import 'package:KKB/components/global/section_label.dart';
+import 'package:KKB/components/global/card.dart';
+import 'package:KKB/utils/helper.dart';
+import 'package:KKB/components/global/empty_state.dart';
+import 'package:KKB/components/expenses/equal_split_members.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/user.dart';
 import 'package:KKB/utils/text_styles.dart';
@@ -25,71 +28,33 @@ class EqualSplit extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const ExpenseSectionLabel('Split between'),
-            Text('${expenseCurrency.format(equalShare)} each', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
+            const KKBSectionLabel('Split between'),
+            Text('${Helper.currency.format(equalShare)} each', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
           ],
         ),
         const SizedBox(height: 10),
-        Container(
+        KKBCard(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-          decoration: expenseCardDecoration(),
           child: others.isEmpty
-              ? Text(
-                  'No members to split with.',
-                  textAlign: TextAlign.center,
-                  style: KKBTextStyles.bodySmall.copyWith(color: KKBColors.lightTextSecondary),
-                )
-              : Wrap(alignment: WrapAlignment.spaceAround, spacing: 8, runSpacing: 16, children: [for (final (index, member) in others) _buildSplitMember(member, index)]),
+              ? const KKBEmptyState(title: 'No members to split with', subtitle: 'Invite members to the group to split expenses')
+              : Wrap(
+                  alignment: WrapAlignment.spaceAround,
+                  spacing: 8,
+                  runSpacing: 16,
+                  children: [
+                    for (final (index, member) in others)
+                      EqualSplitMember(
+                        member: member,
+                        colorIndex: index,
+                        selected: selectedIds.contains(member.id),
+                        equalShare: equalShare,
+                        onTap: () => onToggle(member.id),
+                      ),
+                  ],
+                ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSplitMember(User member, int colorIndex) {
-    final selected = selectedIds.contains(member.id);
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => onToggle(member.id),
-      child: SizedBox(
-        width: 72,
-        child: Column(
-          spacing: 6,
-          children: [
-            Opacity(
-              opacity: selected ? 1 : 0.4,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  MemberAvatar(user: member, colorIndex: colorIndex, size: 40),
-                  if (selected)
-                    Positioned(
-                      right: -4,
-                      bottom: -4,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: KKBColors.lightPrimary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: KKBColors.lightSurface, width: 2),
-                        ),
-                        child: const Icon(Icons.check_rounded, size: 12, color: KKBColors.lightOnPrimary),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Text(
-              selected ? expenseCurrency.format(equalShare) : '—',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightTextPrimary),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

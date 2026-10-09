@@ -1,4 +1,6 @@
-import 'package:KKB/components/settle/settle_shared.dart';
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/section_label.dart';
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/models/settlement_input.dart';
@@ -114,7 +116,8 @@ class _RecordPaymentCardState extends ConsumerState<RecordPaymentCard> {
       });
     }
 
-    return SettleCard(
+    return KKBCard(
+      hasShadow: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -141,7 +144,7 @@ class _RecordPaymentCardState extends ConsumerState<RecordPaymentCard> {
             ],
           ),
           const SizedBox(height: 16),
-          Text('Amount', style: KKBTextStyles.bodySmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
+          const KKBSectionLabel('Amount'),
           const SizedBox(height: 6),
           TextField(
             controller: _amountController,
@@ -169,7 +172,7 @@ class _RecordPaymentCardState extends ConsumerState<RecordPaymentCard> {
           const SizedBox(height: 10),
           Text('$toName will be asked to confirm this payment.', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
           const SizedBox(height: 14),
-          SettleButton(label: _submitting ? 'Recording…' : 'Record payment', height: 52, onPressed: canSubmit ? () => _submit(fromId, toId, amount) : null),
+          KKBButton(label: _submitting ? 'Recording…' : 'Record payment', height: 52, onPressed: canSubmit ? () => _submit(fromId, toId, amount) : null),
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
@@ -180,7 +183,7 @@ class _RecordPaymentCardState extends ConsumerState<RecordPaymentCard> {
               children: [
                 const Icon(Icons.info_outline, size: 16, color: KKBColors.lightTextPrimary),
                 Expanded(
-                  child: Text('$fromBalance balance stays at ${settleCurrency.format(owed)} owed until $toName confirms.', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextPrimary)),
+                  child: Text('$fromBalance balance stays at ${Helper.currency.format(owed)} owed until $toName confirms.', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextPrimary)),
                 ),
               ],
             ),

@@ -33,7 +33,7 @@ class KKBGroupHeader extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Flexible(child: GroupHeaderCard()),
+          Flexible(child: GroupHeaderCard(onTap: onTapGroup)),
           const SizedBox(width: 12),
           GroupHeaderBell(
             hasNotifications: hasNotifications,

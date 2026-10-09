@@ -1,3 +1,5 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/components/global/member_avatar.dart';
 import 'package:KKB/components/balances/balances_shared.dart';
 import 'package:KKB/const/colors.dart';
@@ -49,9 +51,8 @@ class _SuggestedPaymentCardState extends ConsumerState<SuggestedPaymentCard> {
     final isOwedToMe = payment.to.id == widget.userId;
     final title = isMine ? 'You pay ${payment.to.firstName}' : '${payment.from.firstName} pays ${payment.to.firstName}';
 
-    return Container(
+    return KKBCard(
       padding: const EdgeInsets.all(14),
-      decoration: balanceCardDecoration(),
       child: Row(
         spacing: 10,
         children: [
@@ -82,25 +83,11 @@ class _SuggestedPaymentCardState extends ConsumerState<SuggestedPaymentCard> {
             crossAxisAlignment: CrossAxisAlignment.end,
             spacing: 6,
             children: [
-              Text(balanceCurrency.format(payment.amount), style: KKBTextStyles.bodyMediumXBold.copyWith(color: isMine ? KKBColors.lightOwe : KKBColors.lightTextPrimary)),
+              Text(Helper.currency.format(payment.amount), style: KKBTextStyles.bodyMediumXBold.copyWith(color: isMine ? KKBColors.lightOwe : KKBColors.lightTextPrimary)),
               if (isMine)
-                FilledButton(
-                  onPressed: () => context.go(AppRoutes.groupSettle),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: KKBColors.lightPrimary,
-                    foregroundColor: KKBColors.lightOnPrimary,
-                    minimumSize: const Size(0, 36),
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text('Settle up', style: KKBTextStyles.buttonSmall),
-                )
+                KKBButton(label: 'Settle up', size: KKBButtonSize.small, onPressed: () => context.go(AppRoutes.groupSettle))
               else if (isOwedToMe)
-                OutlinedButton(
-                  onPressed: _sending ? null : _remind,
-                  style: balanceOutlinedButtonStyle(),
-                  child: Text(_sending ? 'Sending…' : 'Remind', style: KKBTextStyles.buttonSmall),
-                ),
+                KKBButton(label: _sending ? 'Sending…' : 'Remind', isOutlined: true, size: KKBButtonSize.small, onPressed: _sending ? null : _remind),
             ],
           ),
         ],

@@ -38,7 +38,10 @@ export class ClerkWebhookController {
       const { error } = await this.supabase.from('users').upsert(
         {
           id: u.id,
-          email: u.email_addresses[0].email_address,
+          // users can sign up without an email (e.g. phone only), so don't assume one exists
+          email: u.email_addresses.find((e) => e.id === u.primary_email_address_id)?.email_address
+            ?? u.email_addresses[0]?.email_address
+            ?? null,
           display_name: [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username,
           first_name: u.first_name,
           last_name: u.last_name,

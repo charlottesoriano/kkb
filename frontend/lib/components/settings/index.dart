@@ -1,8 +1,9 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/components/global/title.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/core/auth.dart';
 import 'package:KKB/providers/global/graphql_client.dart';
-import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
 import 'package:KKB/providers/settings/user_profile.dart';
 import 'package:KKB/utils/text_styles.dart';
@@ -137,19 +138,9 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ref.watch(preferredModeProvider) == 'dark';
     final groups = ref.watch(userGroupsProvider);
     final userInfo = ref.read(authServiceProvider).authFetchUserInfo().body as Map<String, dynamic>;
 
-    final background = isDark ? KKBColors.darkBackground : KKBColors.lightBackground;
-    final surface = isDark ? KKBColors.darkSurface : KKBColors.lightSurface;
-    final surfaceVariant = isDark ? KKBColors.darkSurfaceVariant : KKBColors.lightSurfaceVariant;
-    final border = isDark ? KKBColors.darkBorder : KKBColors.lightBorder;
-    final textPrimary = isDark ? KKBColors.darkTextPrimary : KKBColors.lightTextPrimary;
-    final textSecondary = isDark ? KKBColors.darkTextSecondary : KKBColors.lightTextSecondary;
-    final primary = isDark ? KKBColors.darkPrimary : KKBColors.lightPrimary;
-    final onPrimary = isDark ? KKBColors.darkOnPrimary : KKBColors.lightOnPrimary;
-    final danger = isDark ? KKBColors.darkOwe : KKBColors.lightOwe;
 
     final String userId = userInfo['id'] ?? '';
     final String email = userInfo['email'] ?? '';
@@ -169,19 +160,13 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
       if (memberSince != null) 'Member since ${_monthNames[memberSince.month - 1]} ${memberSince.year}',
     ].join(' · ');
 
-    BoxDecoration card() => BoxDecoration(
-      color: surface,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: border),
-    );
-
     // label on the left, value on the right; the value is an input that only unlocks while editing
     Widget profileRow(String label, TextEditingController controller, {TextInputAction action = TextInputAction.next}) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: _editing ? 6 : 14),
         child: Row(
           children: [
-            Text(label, style: KKBTextStyles.bodyMedium.copyWith(color: textSecondary)),
+            Text(label, style: KKBTextStyles.bodyMedium.copyWith(color: KKBColors.lightTextSecondary)),
             const SizedBox(width: 16),
             Expanded(
               child: TextField(
@@ -190,15 +175,15 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                 textAlign: TextAlign.right,
                 textInputAction: action,
                 textCapitalization: TextCapitalization.words,
-                cursorColor: primary,
-                style: KKBTextStyles.bodyMediumBold.copyWith(color: textPrimary),
+                cursorColor: KKBColors.lightPrimary,
+                style: KKBTextStyles.bodyMediumBold.copyWith(color: KKBColors.lightTextPrimary),
                 decoration: InputDecoration(
                   isDense: true,
                   contentPadding: EdgeInsets.symmetric(vertical: _editing ? 8 : 0),
                   border: InputBorder.none,
                   disabledBorder: InputBorder.none,
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: border)),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primary, width: 2)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: KKBColors.lightBorder)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: KKBColors.lightPrimary, width: 2)),
                 ),
               ),
             ),
@@ -225,7 +210,7 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
     }
 
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: KKBColors.lightBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -236,9 +221,8 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
               const SizedBox(height: 20),
 
               // profile card
-              Container(
+              KKBCard(
                 padding: const EdgeInsets.all(16),
-                decoration: card(),
                 child: Column(
                   children: [
                     Row(
@@ -252,10 +236,10 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                           ),
                           child: CircleAvatar(
                             radius: 30,
-                            backgroundColor: primary,
+                            backgroundColor: KKBColors.lightPrimary,
                             child: Text(
                               initials,
-                              style: KKBTextStyles.labelXSmall.copyWith(fontSize: 26, color: onPrimary),
+                              style: KKBTextStyles.labelXSmall.copyWith(fontSize: 26, color: KKBColors.lightOnPrimary),
                             ),
                           ),
                         ),
@@ -264,9 +248,9 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 2,
                             children: [
-                              Text(displayName, style: KKBTextStyles.titleLarge.copyWith(color: textPrimary)),
-                              Text(email, style: KKBTextStyles.bodyMedium.copyWith(color: textSecondary), overflow: TextOverflow.ellipsis),
-                              Text(subtitle, style: KKBTextStyles.bodyXSmall.copyWith(color: textSecondary)),
+                              Text(displayName, style: KKBTextStyles.titleLarge.copyWith(color: KKBColors.lightTextPrimary)),
+                              Text(email, style: KKBTextStyles.bodyMedium.copyWith(color: KKBColors.lightTextSecondary), overflow: TextOverflow.ellipsis),
+                              Text(subtitle, style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
                             ],
                           ),
                         ),
@@ -276,16 +260,16 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
-                        color: surfaceVariant.withValues(alpha: 0.5),
+                        color: KKBColors.lightSurfaceVariant.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: border),
+                        border: Border.all(color: KKBColors.lightBorder),
                       ),
                       child: Column(
                         children: [
                           profileRow('First name', _firstNameController),
-                          Divider(height: 1, color: border),
+                          Divider(height: 1, color: KKBColors.lightBorder),
                           profileRow('Last name', _lastNameController),
-                          Divider(height: 1, color: border),
+                          Divider(height: 1, color: KKBColors.lightBorder),
                           profileRow('Display name', _displayNameController, action: TextInputAction.done),
                         ],
                       ),
@@ -295,51 +279,14 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                       Row(
                         spacing: 12,
                         children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _saving ? null : _cancelEdit,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                foregroundColor: textPrimary,
-                                side: BorderSide(color: border),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              ),
-                              child: Text('Cancel', style: KKBTextStyles.buttonMedium),
-                            ),
-                          ),
-                          Expanded(
-                            child: FilledButton(
-                              onPressed: _saving ? null : () => _saveProfile(userId),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                backgroundColor: primary,
-                                foregroundColor: onPrimary,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              ),
-                              child: _saving
-                                  ? SizedBox(
-                                      height: 18,
-                                      width: 18,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: onPrimary),
-                                    )
-                                  : Text('Save', style: KKBTextStyles.buttonMedium),
-                            ),
-                          ),
+                          Expanded(child: KKBButton(label: 'Cancel', isOutlined: true, onPressed: _saving ? null : _cancelEdit)),
+                          Expanded(child: KKBButton(label: 'Save', isLoading: _saving, onPressed: () => _saveProfile(userId))),
                         ],
                       )
                     else
                       SizedBox(
                         width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () => setState(() => _editing = true),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            foregroundColor: textPrimary,
-                            side: BorderSide(color: border),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          ),
-                          child: Text('Edit profile', style: KKBTextStyles.buttonMedium),
-                        ),
+                        child: KKBButton(label: 'Edit profile', isOutlined: true, onPressed: () => setState(() => _editing = true)),
                       ),
                   ],
                 ),
@@ -347,14 +294,13 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
               const SizedBox(height: 16),
 
               // account actions
-              Container(
+              KKBCard(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: card(),
                 child: Column(
                   children: [
-                    actionRow(Icons.logout, 'Log out', textPrimary, _logout),
-                    Divider(height: 1, color: border),
-                    actionRow(Icons.delete_outline, 'Delete account', danger, _confirmDeleteAccount),
+                    actionRow(Icons.logout, 'Log out', KKBColors.lightTextPrimary, _logout),
+                    Divider(height: 1, color: KKBColors.lightBorder),
+                    actionRow(Icons.delete_outline, 'Delete account', KKBColors.lightOwe, _confirmDeleteAccount),
                   ],
                 ),
               ),
@@ -363,12 +309,12 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
                   'Deleting your account removes your profile and shares from every group. This can\'t be undone.',
-                  style: KKBTextStyles.bodyXSmall.copyWith(color: textSecondary),
+                  style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary),
                 ),
               ),
               const SizedBox(height: 28),
               Center(
-                child: Text('KKB $_appVersion', style: KKBTextStyles.bodyXSmall.copyWith(color: textSecondary)),
+                child: Text('KKB $_appVersion', style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
               ),
             ],
           ),

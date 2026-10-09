@@ -1,5 +1,7 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/components/global/member_avatar.dart';
-import 'package:KKB/components/settle/settle_shared.dart';
+import 'package:KKB/components/global/status_chip.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/settlement.dart';
 import 'package:KKB/providers/auth/current_user.dart';
@@ -42,7 +44,8 @@ class _ConfirmationCardState extends ConsumerState<ConfirmationCard> {
     final pending = ref.watch(groupSettlementsProvider(group.id)).where((s) => s.status == 'pending' && s.toUser.id == userId).toList();
     if (pending.isEmpty) return const SizedBox.shrink();
 
-    return SettleCard(
+    return KKBCard(
+      hasShadow: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 16,
@@ -51,7 +54,7 @@ class _ConfirmationCardState extends ConsumerState<ConfirmationCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Needs your confirmation', style: KKBTextStyles.titleXSmall.copyWith(color: KKBColors.lightTextPrimary)),
-              SettlePill(label: '${pending.length} pending', background: KKBColors.lightOweBackground, foreground: KKBColors.lightOwe),
+              StatusChip(label: '${pending.length} pending', variant: StatusChipVariant.danger, size: StatusChipSize.small),
             ],
           ),
           for (var i = 0; i < pending.length && i < 3; i++) ...[
@@ -105,17 +108,17 @@ class _PendingRow extends StatelessWidget {
                 ],
               ),
             ),
-            Text(settleCurrency.format(settlement.amount), style: KKBTextStyles.bodyLargeXBold.copyWith(color: KKBColors.lightTextPrimary)),
+            Text(Helper.currency.format(settlement.amount), style: KKBTextStyles.bodyLargeXBold.copyWith(color: KKBColors.lightTextPrimary)),
           ],
         ),
         Row(
           spacing: 8,
           children: [
             Expanded(
-              child: SettleButton(label: busy ? '...' : 'Reject', filled: false, onPressed: onReject),
+              child: KKBButton(label: busy ? '...' : 'Reject', isOutlined: true, onPressed: onReject),
             ),
             Expanded(
-              child: SettleButton(label: busy ? '...' : 'Confirm', onPressed: onConfirm),
+              child: KKBButton(label: busy ? '...' : 'Confirm', onPressed: onConfirm),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { assertMember } from '../auth/membership.js';
 import { CreateGroupInput } from './dto/create-group.input.js';
 import { UpdateGroupInput } from './dto/update-group.input.js';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -35,14 +36,19 @@ export class GroupsService {
   }
 
 
-  async create(input: CreateGroupInput, userId: string) {
-    let code = this.generateGroupCode();
+  //a code no other group uses; every candidate is checked, and it gives up after 5 collisions
+  private async uniqueGroupCode() {
     for (let attempt = 0; attempt < 5; attempt++) {
+      const code = this.generateGroupCode();
       const { data: existing, error } = await this.db.from('groups').select('id').eq('code', code);
       if (error) throw error;
-      if (!existing.length) break;
-      code = this.generateGroupCode();
+      if (!existing.length) return code;
     }
+    throw new InternalServerErrorException('Could not generate a unique group code');
+  }
+
+  async create(input: CreateGroupInput, userId: string) {
+    const code = await this.uniqueGroupCode();
 
     const { data, error } = await this.db
       .from('groups')
@@ -58,9 +64,22 @@ export class GroupsService {
 
     if (error) throw error;
 
-    //automatically add the user to the group
-    await this.addGroupMember(code, userId);
+    //automatically add the user to the group; without the creator as a member nobody could open it, so undo the insert
+    try {
+      await this.addGroupMember(code, userId);
+    } catch (e) {
+      await this.db.from('groups').delete().eq('id', data.id);
+      throw e;
+    }
     return data;
+  }
+
+  //only the group's creator can edit or delete it
+  private async assertCreator(groupId: number, userId: string) {
+    const { data: group, error } = await this.db.from('groups').select('created_by').eq('id', groupId).maybeSingle();
+    if (error) throw error;
+    if (!group) throw new NotFoundException('Group not found');
+    if (group.created_by !== userId) throw new ForbiddenException('Only the group creator can do this');
   }
 
   async findUserGroups(userId: string) {
@@ -123,16 +142,13 @@ export class GroupsService {
     }));
   }
 
-  async findGroupMembers(groupId: number) {
-    const { data, error } = await this.db
-      .from('members')
-      .select('*, users!inner(id, email, display_name, first_name, last_name, image_url)')
-      .eq('group_id', groupId);
-    if (error) throw error;
-    return data;
+  async findGroupMembers(groupId: number, userId: string) {
+    await assertMember(this.db, groupId, userId);
+    return this.getGroupMembersByGroupId(groupId);
   }
 
-  async update(groupId: number, input: UpdateGroupInput) {
+  async update(groupId: number, input: UpdateGroupInput, userId: string) {
+    await this.assertCreator(groupId, userId);
     const { data, error } = await this.db
       .from('groups')
       .update(input)
@@ -143,7 +159,8 @@ export class GroupsService {
     return data;
   }
 
-  async remove(groupId: number) {
+  async remove(groupId: number, userId: string) {
+    await this.assertCreator(groupId, userId);
     const { data, error } = await this.db
       .from('groups')
       .delete()
@@ -154,14 +171,16 @@ export class GroupsService {
     return data;
   }
 
-  async removeMember(groupId: number, userId: string) {
-    const { data, error } = await this.db
+  //members can leave on their own; removing someone else is up to the creator
+  async removeMember(groupId: number, userId: string, currentUserId: string) {
+    if (userId !== currentUserId) await this.assertCreator(groupId, currentUserId);
+    const { error } = await this.db
       .from('members')
       .delete()
       .eq('group_id', groupId)
       .eq('user_id', userId);
     if (error) throw error;
-    return data;
+    return true;
   }
 
   async addGroupMember(groupCode: string, userId: string) {

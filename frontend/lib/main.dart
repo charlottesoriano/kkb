@@ -6,7 +6,6 @@ import 'package:KKB/const/colors.dart';
 import 'package:KKB/core/env.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/core/auth.dart';
-import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:KKB/firebase_options.dart';
@@ -61,7 +60,6 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final clerk = ref.read(clerkProvider);
-    final preferredMode = ref.watch(preferredModeProvider);
 
     return MaterialApp.router(
       title: 'KKB',
@@ -71,12 +69,6 @@ class _MyAppState extends ConsumerState<MyApp> {
         colorSchemeSeed: KKBColors.lightPrimary,
         brightness: Brightness.light,
       ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: KKBColors.darkPrimary,
-        brightness: Brightness.dark,
-      ),
-      themeMode: preferredMode == 'light' ? ThemeMode.light : ThemeMode.dark,
       routerConfig: router,
       // Login vs app screens are handled by the router's redirect (core/router.dart).
       // ClerkErrorListener shows Clerk errors as snackbars.

@@ -1,4 +1,5 @@
-import 'package:KKB/components/balances/balances_shared.dart';
+import 'package:KKB/utils/helper.dart';
+import 'package:KKB/components/global/status_chip.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
@@ -22,13 +23,11 @@ class NetBalanceCard extends StatelessWidget {
     };    
 
     Widget buildHeroChip(String label) {
-      return Container(
+      return StatusChip(
+        label: label,
+        background: KKBColors.lightOnHero.withValues(alpha: 0.15),
+        foreground: KKBColors.lightOnHero,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: KKBColors.lightOnHero.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightOnHero)),
       );
     }
 
@@ -74,7 +73,7 @@ class NetBalanceCard extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '$sign${balanceCurrency.format(balance.abs())}',
+                    '$sign${Helper.currency.format(balance.abs())}',
                     style: KKBTextStyles.displayLarge.copyWith(color: KKBColors.lightOnHero),
                   ),
                 ),
@@ -85,8 +84,8 @@ class NetBalanceCard extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    buildHeroChip('Owed to you ${balanceCurrency.format(owedToYou)}'),
-                    buildHeroChip('You owe ${balanceCurrency.format(youOwe)}'),
+                    buildHeroChip('Owed to you ${Helper.currency.format(owedToYou)}'),
+                    buildHeroChip('You owe ${Helper.currency.format(youOwe)}'),
                   ],
                 ),
               ],

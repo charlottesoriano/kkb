@@ -1,4 +1,8 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/card.dart';
+import 'package:KKB/components/signin/google_badge.dart';
 import 'package:KKB/core/auth.dart';
+import 'package:KKB/components/signin/reset_password_dialog.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
@@ -67,8 +71,30 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
   }
 
 
-  void _onForgotPassword() {
+  // emails a reset code to the address in the email field, then asks for the code and the new password
+  Future<void> _onForgotPassword() async {
+    FocusScope.of(context).unfocus();
+    final authService = ref.read(authServiceProvider);
+    final email = _emailController.text.trim();
+    if (!authService.validateEmail(email)) {
+      setState(() => _error = 'Enter your email above, then tap "Forgot password?".');
+      return;
+    }
 
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final result = await authService.authStartPasswordReset(email);
+    if (!mounted) return;
+    setState(() => _loading = false);
+    if (!result.status) {
+      if (!(result.body is Map && result.body['errorShown'] == true)) setState(() => _error = result.message);
+      return;
+    }
+
+    final reset = await showDialog<bool>(context: context, builder: (_) => ResetPasswordDialog(email: email));
+    if (reset == true && mounted) GoRouter.of(context).go(AppRoutes.groups);
   }
 
   void _onCreateAccount() {
@@ -77,11 +103,8 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final c = _SigninColors(isDark);
-
     return Scaffold(
-      backgroundColor: c.background,
+      backgroundColor: KKBColors.lightBackground,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -99,19 +122,19 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
                       style: TextStyle(
                         fontSize: 34,
                         fontWeight: FontWeight.w800,
-                        color: c.textPrimary,
+                        color: KKBColors.lightTextPrimary,
                         letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Split costs, not friendships.',
-                      style: TextStyle(fontSize: 15, color: c.textSecondary),
+                      style: TextStyle(fontSize: 15, color: KKBColors.lightTextSecondary),
                     ),
                     const SizedBox(height: 28),
-                    _buildCard(c),
+                    _buildCard(),
                     const SizedBox(height: 28),
-                    _buildCreateAccount(c)
+                    _buildCreateAccount()
                   ],
                 ),
               ),
@@ -122,21 +145,11 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
     );
   }
 
-  Widget _buildCard(_SigninColors c) {
-    return Container(
+  Widget _buildCard() {
+    return KKBCard(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-      decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: c.border),
-        boxShadow: [
-          BoxShadow(
-            color: c.primary.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      radius: 24,
+      hasShadow: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -145,19 +158,18 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: c.textPrimary,
+              color: KKBColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Sign in to see who owes who.',
-            style: TextStyle(fontSize: 14, color: c.textSecondary),
+            style: TextStyle(fontSize: 14, color: KKBColors.lightTextSecondary),
           ),
           const SizedBox(height: 20),
-          _label('Email', c),
+          _label('Email'),
           const SizedBox(height: 8),
           _textField(
-            c,
             controller: _emailController,
             hint: 'you@example.com',
             keyboardType: TextInputType.emailAddress,
@@ -166,7 +178,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _label('Password', c),
+              _label('Password'),
               GestureDetector(
                 onTap: _onForgotPassword,
                 child: Text(
@@ -174,7 +186,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: c.link,
+                    color: KKBColors.lightLink,
                   ),
                 ),
               ),
@@ -182,7 +194,6 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
           ),
           const SizedBox(height: 8),
           _textField(
-            c,
             controller: _passwordController,
             hint: 'Password',
             obscureText: _obscurePassword,
@@ -193,7 +204,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
                 _obscurePassword
                     ? Icons.visibility_outlined
                     : Icons.visibility_off_outlined,
-                color: c.textSecondary,
+                color: KKBColors.lightTextSecondary,
                 size: 22,
               ),
             ),
@@ -205,101 +216,37 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: c.error,
+                color: KKBColors.lightTextError,
               ),
             ),
           ],
           const SizedBox(height: 20),
-          SizedBox(
-            height: 50,
-            child: FilledButton(
-              onPressed: _loading ? null : _onSignIn,
-              style: FilledButton.styleFrom(
-                backgroundColor: c.primary,
-                foregroundColor: c.onPrimary,
-                disabledBackgroundColor: c.primary.withValues(alpha: 0.6),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              child: _loading
-                  ? SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2.5, color: c.onPrimary),
-                    )
-                  : const Text('Sign in'),
-            ),
-          ),
+          KKBButton(label: 'Sign in', isLoading: _loading, onPressed: _onSignIn),
           const SizedBox(height: 20),
           Row(
             children: [
-              Expanded(child: Divider(color: c.border, thickness: 1)),
+              Expanded(child: Divider(color: KKBColors.lightBorder, thickness: 1)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   'or',
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
+                  style: TextStyle(fontSize: 13, color: KKBColors.lightTextSecondary),
                 ),
               ),
-              Expanded(child: Divider(color: c.border, thickness: 1)),
+              Expanded(child: Divider(color: KKBColors.lightBorder, thickness: 1)),
             ],
           ),
           const SizedBox(height: 20),
-          SizedBox(
-            height: 50,
-            child: OutlinedButton(
-              onPressed: _onGoogleSignIn,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: c.textPrimary,
-                backgroundColor: c.surface,
-                side: BorderSide(color: c.border),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 22,
-                    height: 22,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: c.textPrimary, width: 1.2),
-                    ),
-                    child: Text(
-                      'G',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: c.textPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Continue with Google',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          KKBButton(label: 'Continue with Google', isOutlined: true, leading: const GoogleBadge(), onPressed: _onGoogleSignIn),
         ],
       ),
     );
   }
 
-  Widget _buildCreateAccount(_SigninColors c) {
+  Widget _buildCreateAccount() {
     return Text.rich(
       TextSpan(
-        style: TextStyle(fontSize: 14, color: c.textSecondary),
+        style: TextStyle(fontSize: 14, color: KKBColors.lightTextSecondary),
         children: [
           const TextSpan(text: 'New to KKB? '),
           WidgetSpan(
@@ -312,7 +259,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: c.link,
+                  color: KKBColors.lightLink,
                 ),
               ),
             ),
@@ -322,19 +269,19 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
     );
   }
 
-  Widget _label(String text, _SigninColors c) {
+  Widget _label(String text) {
     return Text(
       text,
       style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: c.textPrimary,
+        color: KKBColors.lightTextPrimary,
       ),
     );
   }
 
   Widget _textField(
-    _SigninColors c, {
+    {
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
@@ -350,17 +297,17 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
-      style: TextStyle(fontSize: 15, color: c.textPrimary),
+      style: TextStyle(fontSize: 15, color: KKBColors.lightTextPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: c.textSecondary.withValues(alpha: 0.6)),
+        hintStyle: TextStyle(color: KKBColors.lightTextSecondary.withValues(alpha: 0.6)),
         filled: true,
-        fillColor: c.background,
+        fillColor: KKBColors.lightBackground,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         suffixIcon: suffixIcon,
-        enabledBorder: border(c.border),
-        focusedBorder: border(c.primary),
+        enabledBorder: border(KKBColors.lightBorder),
+        focusedBorder: border(KKBColors.lightPrimary),
       ),
     );
   }
@@ -402,24 +349,4 @@ class _LogoCircles extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SigninColors {
-  _SigninColors(this.isDark);
-
-  final bool isDark;
-
-  Color get background =>
-      isDark ? KKBColors.darkBackground : KKBColors.lightBackground;
-  Color get surface => isDark ? KKBColors.darkSurface : KKBColors.lightSurface;
-  Color get border => isDark ? KKBColors.darkBorder : KKBColors.lightBorder;
-  Color get textPrimary =>
-      isDark ? KKBColors.darkTextPrimary : KKBColors.lightTextPrimary;
-  Color get textSecondary =>
-      isDark ? KKBColors.darkTextSecondary : KKBColors.lightTextSecondary;
-  Color get link => isDark ? KKBColors.darkLink : KKBColors.lightLink;
-  Color get primary => isDark ? KKBColors.darkPrimary : KKBColors.lightPrimary;
-  Color get onPrimary =>
-      isDark ? KKBColors.darkOnPrimary : KKBColors.lightOnPrimary;
-  Color get error => isDark ? KKBColors.darkOwe : KKBColors.lightTextError;
 }

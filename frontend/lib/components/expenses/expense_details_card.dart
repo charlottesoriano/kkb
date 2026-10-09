@@ -1,3 +1,5 @@
+import 'package:KKB/components/global/section_label.dart';
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/components/expenses/add_expense_shared.dart';
 import 'package:KKB/components/global/text_field.dart';
 import 'package:KKB/const/colors.dart';
@@ -19,10 +21,9 @@ class ExpenseDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return KKBCard(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: expenseCardDecoration(radius: 24),
+      radius: 24,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -34,7 +35,7 @@ class ExpenseDetailsCard extends StatelessWidget {
             onChanged: (_) => onChanged(),
           ),
           const SizedBox(height: 16),
-          Text('Amount', style: KKBTextStyles.bodySmallSemiBold.copyWith(color: KKBColors.lightTextPrimary)),
+          const KKBSectionLabel('Amount'),
           const SizedBox(height: 6),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,

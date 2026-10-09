@@ -24,22 +24,23 @@ export class ExpensesResolver {
   }
 
   @Query(() => [Expense], { name: 'expenses' })
-  findAll(@Args('groupId', { type: () => Int }) groupId: number) {
-    return this.expensesService.findAll(groupId);
+  findAll(@Args('groupId', { type: () => Int }) groupId: number, @CurrentUser() userId: string) {
+    return this.expensesService.findAll(groupId, userId);
   }
 
   @Query(() => Expense, { name: 'expense' })
-  findOne(@Args('id', { type: () => Int }) id: number) {
+  async findOne(@Args('id', { type: () => Int }) id: number, @CurrentUser() userId: string) {
+    await this.expensesService.assertCanAccess(id, userId);
     return this.expensesService.findOne(id);
   }
 
   @Mutation(() => Expense)
-  updateExpense(@Args('updateExpenseInput') updateExpenseInput: UpdateExpenseInput) {
-    return this.expensesService.update(updateExpenseInput.id, updateExpenseInput);
+  updateExpense(@Args('updateExpenseInput') updateExpenseInput: UpdateExpenseInput, @CurrentUser() userId: string) {
+    return this.expensesService.update(updateExpenseInput.id, updateExpenseInput, userId);
   }
 
   @Mutation(() => Expense)
-  removeExpense(@Args('id', { type: () => Int }) id: number) {
-    return this.expensesService.remove(id);
+  removeExpense(@Args('id', { type: () => Int }) id: number, @CurrentUser() userId: string) {
+    return this.expensesService.remove(id, userId);
   }
 }

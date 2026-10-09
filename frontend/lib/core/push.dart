@@ -30,6 +30,33 @@ Future<void> registerPushToken(WidgetRef ref) async {
   }
 }
 
+// removes this device's token for the signed-in user; call before signing out, the mutation needs the Clerk token
+Future<void> unregisterPushToken(GraphQLClient client) async {
+  try {
+    await _tokenRefresh?.cancel();
+    _tokenRefresh = null;
+
+    final messaging = FirebaseMessaging.instance;
+    final token = await messaging.getToken();
+    if (token == null) return;
+    final result = await client.mutate(
+      MutationOptions(
+        document: gql(r'''
+          mutation UnregisterDeviceToken($token: String!) {
+            unregisterDeviceToken(token: $token)
+          }
+        '''),
+        variables: {"token": token},
+      ),
+    );
+    if (result.hasException) debugPrint('FCM token not removed: ${result.exception}');
+    // a fresh token is issued and saved at the next sign in
+    await messaging.deleteToken();
+  } catch (e) {
+    debugPrint('FCM token not removed: $e');
+  }
+}
+
 Future<void> _saveToken(WidgetRef ref, String token) async {
   final result = await ref.read(graphqlClientProvider).mutate(
     MutationOptions(

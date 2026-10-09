@@ -19,18 +19,13 @@ class GroupSettlements extends _$GroupSettlements {
     return [];
   }
 
-  // parse a user from the graphql response
-  User parseUser(Map<String, dynamic> data) {
-    return User(id: data['id'], email: data['email'], displayName: data['display_name'], firstName: data['first_name'], lastName: data['last_name'], imageUrl: data['image_url'] ?? '', createdAt: data['created_at'] ?? '');
-  }
-
   // parse a settlement from the graphql response
   Settlement parseSettlement(Map<String, dynamic> data) {
     return Settlement(
       id: data['id'],
       groupId: data['group_id'],
-      fromUser: parseUser(data['from_user']),
-      toUser: parseUser(data['to_user']),
+      fromUser: Helper.parseUser(data['from_user']),
+      toUser: Helper.parseUser(data['to_user']),
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       status: data['status'] ?? 'unpaid',
       createdAt: DateTime.parse(data['created_at']),

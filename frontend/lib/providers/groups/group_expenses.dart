@@ -2,7 +2,6 @@ import 'package:KKB/models/expense.dart';
 import 'package:KKB/models/expense_input.dart';
 import 'package:KKB/models/expense_split.dart';
 import 'package:KKB/models/response_status.dart';
-import 'package:KKB/models/user.dart';
 import 'package:KKB/providers/groups/group_balances.dart';
 import 'package:KKB/providers/global/graphql_client.dart';
 import 'package:KKB/utils/helper.dart';
@@ -19,11 +18,6 @@ class GroupExpenses extends _$GroupExpenses {
     return [];
   }
 
-  // parse a user from the graphql response
-  User parseUser(Map<String, dynamic> data) {
-    return User(id: data['id'], email: data['email'], displayName: data['display_name'], firstName: data['first_name'], lastName: data['last_name'], imageUrl: data['image_url'] ?? '', createdAt: data['created_at'] ?? '');
-  }
-
   // parse an expense from the graphql response
   Expense parseExpense(Map<String, dynamic> data) {
     final List<dynamic> splits = data['splits'] ?? [];
@@ -32,12 +26,12 @@ class GroupExpenses extends _$GroupExpenses {
       groupId: data['group_id'],
       description: data['description'] ?? '',
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
-      paidBy: parseUser(data['paid_by']),
+      paidBy: Helper.parseUser(data['paid_by']),
       createdAt: data['created_at'] ?? '',
       splits: splits.map((split) => ExpenseSplit(
         id: split['id'],
         expenseId: split['expense_id'],
-        user: parseUser(split['user']),
+        user: Helper.parseUser(split['user']),
         amount: (split['amount'] as num?)?.toDouble() ?? 0,
       )).toList(),
     );

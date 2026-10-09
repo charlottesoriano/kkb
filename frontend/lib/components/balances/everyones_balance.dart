@@ -1,5 +1,7 @@
+import 'package:KKB/components/global/card.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:KKB/components/global/member_avatar.dart';
-import 'package:KKB/components/balances/balances_shared.dart';
+import 'package:KKB/components/global/member_display.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/models/balance.dart';
 import 'package:KKB/models/group.dart';
@@ -29,25 +31,23 @@ class EveryonesBalance extends StatelessWidget {
         child: Row(
           spacing: 12,
           children: [
-            MemberAvatar(user: balance.user, colorIndex: MemberAvatar.colorIndexIn(group.members, balance.user.id)),
             Expanded(
-              child: Text(
-                isMe ? '${balance.user.firstName} (you)' : balance.user.firstName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: KKBTextStyles.bodyMediumSemiBold.copyWith(color: KKBColors.lightTextPrimary),
+              child: MemberDisplay(
+                user: balance.user,
+                isHorizontal: true,
+                isMe: isMe,
+                colorIndex: MemberAvatar.colorIndexIn(group.members, balance.user.id),
               ),
             ),
             Text(label, style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
-            Text('$sign${balanceCurrency.format(balance.amount.abs())}', style: KKBTextStyles.bodyMediumXBold.copyWith(color: color)),
+            Text('$sign${Helper.currency.format(balance.amount.abs())}', style: KKBTextStyles.bodyMediumXBold.copyWith(color: color)),
           ],
         ),
       );
     }
     
-    return Container(
+    return KKBCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      decoration: balanceCardDecoration(),
       child: Column(
         children: [
           for (var i = 0; i < balances.length; i++) 

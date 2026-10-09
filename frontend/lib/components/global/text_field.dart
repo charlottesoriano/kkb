@@ -17,7 +17,6 @@ enum KKBInputType { text, email, number, password, search }
 ///   Set [clearable] to show the clear button on any other type.)
 /// - [hintText]: placeholder, fully dynamic.
 /// - [type]: text, email, number, password or search.
-/// - Light/dark colors are picked automatically from the current theme.
 class KKBTextField extends StatefulWidget {
   const KKBTextField({
     super.key,
@@ -222,7 +221,7 @@ class _KKBTextFieldState extends State<KKBTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final p = _Palette.of(context);
+    final p = _Palette.light;
     final radius = BorderRadius.circular(_isSearch ? 16 : 14);
 
     OutlineInputBorder border(Color color, [double width = 1]) =>
@@ -308,7 +307,7 @@ class _KKBTextFieldState extends State<KKBTextField> {
   }
 }
 
-/// Resolves KKBColors for the current light/dark theme.
+/// KKBColors used by the text field.
 class _Palette {
   const _Palette({
     required this.fill,
@@ -332,30 +331,15 @@ class _Palette {
   final Color error;
   final Color label;
 
-  static _Palette of(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return dark
-        ? const _Palette(
-            fill: KKBColors.darkSurface,
-            searchFill: KKBColors.darkSurface,
-            border: KKBColors.darkBorder,
-            text: KKBColors.darkTextPrimary,
-            placeholder: KKBColors.darkTextSecondary,
-            icon: KKBColors.darkTextPrimary,
-            focus: KKBColors.darkPrimary,
-            error: KKBColors.darkOwe,
-            label: KKBColors.darkTextPrimary,
-          )
-        : const _Palette(
-            fill: KKBColors.lightSurface,
-            searchFill: KKBColors.lightSurface,
-            border: KKBColors.lightBorder,
-            text: KKBColors.lightTextPrimary,
-            placeholder: KKBColors.lightTextSecondary,
-            icon: KKBColors.lightTextPrimary,
-            focus: KKBColors.lightPrimary,
-            error: KKBColors.lightOwe,
-            label: KKBColors.lightTextPrimary,
-          );
-  }
+  static const light = _Palette(
+    fill: KKBColors.lightSurface,
+    searchFill: KKBColors.lightSurface,
+    border: KKBColors.lightBorder,
+    text: KKBColors.lightTextPrimary,
+    placeholder: KKBColors.lightTextSecondary,
+    icon: KKBColors.lightTextPrimary,
+    focus: KKBColors.lightPrimary,
+    error: KKBColors.lightOwe,
+    label: KKBColors.lightTextPrimary,
+  );
 }

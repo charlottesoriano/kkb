@@ -1,7 +1,7 @@
+import 'package:KKB/utils/helper.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/utils/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class BalanceLabel extends StatelessWidget {
   const BalanceLabel({super.key, required this.balance, this.crossAxisAlignment = CrossAxisAlignment.end, this.labelStyle = KKBTextStyles.bodyXSmall, this.amountStyle = KKBTextStyles.bodyLargeXBold});
@@ -13,7 +13,6 @@ class BalanceLabel extends StatelessWidget {
   final TextStyle labelStyle;
   final TextStyle amountStyle;
 
-  static final _currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class BalanceLabel extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: crossAxisAlignment == CrossAxisAlignment.start ? Alignment.centerLeft : Alignment.centerRight,
-          child: Text(_currency.format(balance.abs()), style: amountStyle.copyWith(color: color)),
+          child: Text(Helper.currency.format(balance.abs()), style: amountStyle.copyWith(color: color)),
         ),
       ],
     );

@@ -1,7 +1,6 @@
 import 'package:KKB/components/global/bottom_navigation.dart';
 import 'package:KKB/const/icons.dart';
 import 'package:KKB/const/colors.dart';
-import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
 import 'package:KKB/providers/global/notifications.dart';
 import 'package:flutter/material.dart';
@@ -41,8 +40,7 @@ class _AppNavigationState extends ConsumerState<AppNavigation> with WidgetsBindi
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ref.watch(preferredModeProvider) == 'dark';
-    final background = isDark ? KKBColors.darkBackground : KKBColors.lightBackground;
+    final background = KKBColors.lightBackground;
 
     return Scaffold(
       backgroundColor: background,

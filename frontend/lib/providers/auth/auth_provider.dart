@@ -1,5 +1,6 @@
 import 'package:clerk_auth/clerk_auth.dart';
 import 'package:clerk_flutter/clerk_flutter.dart';
+import 'package:KKB/core/push.dart';
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/providers/global/graphql_client.dart';
 import 'package:KKB/utils/helper.dart';
@@ -77,6 +78,27 @@ class AuthService {
     final error = await _clerkCall(() => _clerk.attemptSignUp(strategy: Strategy.emailCode, emailAddress: signUp.emailAddress));
     if (error != null) return error;
     return ResponseStatus(message: 'A new code was sent to your email', status: true, body: {});
+  }
+
+  /// Emails a password reset code, finish with [authResetPassword]
+  Future<ResponseStatus> authStartPasswordReset(String email) async {
+    final error = await _clerkCall(() => _clerk.initiatePasswordReset(identifier: email, strategy: Strategy.resetPasswordEmailCode));
+    if (error != null) return error;
+    return ResponseStatus(message: 'We sent a reset code to $email', status: true, body: {});
+  }
+
+  /// Sets the new password with the emailed code; Clerk signs the user in when it works
+  Future<ResponseStatus> authResetPassword({required String email, required String code, required String newPassword}) async {
+    final error = await _clerkCall(() => _clerk.attemptSignIn(
+      strategy: Strategy.resetPasswordEmailCode,
+      identifier: email,
+      code: code,
+      password: newPassword,
+    ));
+    if (error != null) return error;
+
+    if (!_clerk.isSignedIn) return ResponseStatus(message: 'Password reset incomplete', status: false, body: {});
+    return ResponseStatus(message: 'Password reset', status: true, body: _userBody());
   }
 
   bool get _needsEmailVerification => _clerk.client.signUp?.unverified(Field.emailAddress) == true;
@@ -165,6 +187,8 @@ class AuthService {
     dynamic body = {};
 
     try {
+      // stop this device getting the user's notifications; done first, while the session can still call the backend
+      await unregisterPushToken(_ref.read(graphqlClientProvider));
       await _clerk.signOut();
       message = 'Logged out';
       status = true;
@@ -199,7 +223,7 @@ class AuthService {
   }
 
   bool validateEmail(String? value) {
-    const pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$';
+    const pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
     final regex = RegExp(pattern);
 
     if (value == null || value.isEmpty) {

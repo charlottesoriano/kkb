@@ -124,7 +124,16 @@ class Helper {
     return expense.paidBy.id == userId ? expense.amount - userShare : -userShare;
   }
 
+  // parse a user from a graphql response; deleted users come back with null email, names and image, so every field falls back
   static User parseUser(Map<String, dynamic>? data) {
-    return User(id: data?['id'] ?? '', email: data?['email'] ?? '', displayName: data?['display_name'] ?? '', firstName: data?['first_name'] ?? '', lastName: data?['last_name'] ?? '');
+    return User(
+      id: data?['id'] ?? '',
+      email: data?['email'] ?? '',
+      displayName: data?['display_name'] ?? '',
+      firstName: data?['first_name'] ?? '',
+      lastName: data?['last_name'] ?? '',
+      imageUrl: data?['image_url'] ?? '',
+      createdAt: data?['created_at'] ?? '',
+    );
   }
 }

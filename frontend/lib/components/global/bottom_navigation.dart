@@ -1,6 +1,5 @@
 import 'package:KKB/components/global/svg_icon.dart';
 import 'package:KKB/const/colors.dart';
-import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,12 +22,11 @@ class KKBBottomNavigation extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(preferredModeProvider) == 'dark';
 
-    final surface = isDark ? KKBColors.darkSurface : KKBColors.lightSurface;
-    final border = isDark ? KKBColors.darkBorder : KKBColors.lightBorder;
-    final inactive = isDark ? KKBColors.darkTextSecondary : KKBColors.lightTextSecondary;
-    final active = isDark ? KKBColors.darkLink : KKBColors.lightLink;
+    final surface = KKBColors.lightSurface;
+    final border = KKBColors.lightBorder;
+    final inactive = KKBColors.lightTextSecondary;
+    final active = KKBColors.lightLink;
 
     return DecoratedBox(
       decoration: BoxDecoration(

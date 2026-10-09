@@ -1,3 +1,5 @@
+import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/components/global/section_label.dart';
 import 'package:KKB/components/balances/balances_shared.dart';
 import 'package:KKB/components/balances/everyones_balance.dart';
 import 'package:KKB/components/balances/invite_code_card.dart';
@@ -86,7 +88,7 @@ class _BalancesIndexState extends ConsumerState<BalancesIndex> {
               const SizedBox(height: 12),
               InviteCodeCard(inviteCode: group.code),
               const SizedBox(height: 12),
-              const BalanceSectionLabel('Suggested payments'),
+              const KKBSectionLabel('Suggested payments', style: KKBTextStyles.bodyMediumBold),
               const SizedBox(height: 10),
               Column(
                 spacing: 12,
@@ -94,7 +96,7 @@ class _BalancesIndexState extends ConsumerState<BalancesIndex> {
               ),
               const SizedBox(height: 20),
 
-              const BalanceSectionLabel("Everyone's balance"),
+              const KKBSectionLabel("Everyone's balance", style: KKBTextStyles.bodyMediumBold),
               const SizedBox(height: 10),
               EveryonesBalance(group: group, balances: balances, userId: userId),
             ],

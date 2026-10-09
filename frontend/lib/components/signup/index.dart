@@ -1,3 +1,6 @@
+import 'package:KKB/components/global/button.dart';
+import 'package:KKB/components/global/card.dart';
+import 'package:KKB/components/signin/google_badge.dart';
 import 'package:KKB/core/auth.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/models/response_status.dart';
@@ -144,11 +147,8 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final c = _SignupColors(isDark);
-
     return Scaffold(
-      backgroundColor: c.background,
+      backgroundColor: KKBColors.lightBackground,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
@@ -165,7 +165,7 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
                       children: [
                         IconButton(
                           onPressed: _onBack,
-                          icon: Icon(Icons.arrow_back_ios_new, size: 20, color: c.textPrimary),
+                          icon: Icon(Icons.arrow_back_ios_new, size: 20, color: KKBColors.lightTextPrimary),
                         ),
                         const _LogoCircles(),
                       ],
@@ -176,7 +176,7 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: c.textPrimary,
+                        color: KKBColors.lightTextPrimary,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -185,24 +185,24 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
                       _verifying
                           ? 'One last step before you start splitting.'
                           : 'Start splitting costs with your roommates and trip groups.',
-                      style: TextStyle(fontSize: 15, color: c.textSecondary),
+                      style: TextStyle(fontSize: 15, color: KKBColors.lightTextSecondary),
                     ),
                     const SizedBox(height: 20),
-                    _verifying ? _buildVerifyCard(c) : _buildCard(c),
+                    _verifying ? _buildVerifyCard() : _buildCard(),
                     if (!_verifying) ...[
                       const SizedBox(height: 20),
-                      _buildDivider(c),
+                      _buildDivider(),
                       const SizedBox(height: 20),
-                      _buildGoogleButton(c),
+                      KKBButton(label: 'Sign up with Google', isOutlined: true, leading: const GoogleBadge(), onPressed: _loading ? null : _onGoogleSignUp),
                       const SizedBox(height: 20),
-                      _buildSignIn(c),
+                      _buildSignIn(),
                     ],
                     const Spacer(),
                     const SizedBox(height: 24),
                     Text(
                       'Secure sign-up by Clerk',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+                      style: TextStyle(fontSize: 12, color: KKBColors.lightTextSecondary),
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -215,25 +215,11 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
     );
   }
 
-  BoxDecoration _cardDecoration(_SignupColors c) {
-    return BoxDecoration(
-      color: c.surface,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: c.border),
-      boxShadow: [
-        BoxShadow(
-          color: c.primary.withValues(alpha: 0.08),
-          blurRadius: 24,
-          offset: const Offset(0, 8),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCard(_SignupColors c) {
-    return Container(
+  Widget _buildCard() {
+    return KKBCard(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: _cardDecoration(c),
+      radius: 24,
+      hasShadow: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -243,10 +229,9 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('First name', c),
+                    _label('First name'),
                     const SizedBox(height: 8),
                     _textField(
-                      c,
                       controller: _firstNameController,
                       hint: 'Maya',
                       textCapitalization: TextCapitalization.words,
@@ -259,10 +244,9 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _label('Last name', c),
+                    _label('Last name'),
                     const SizedBox(height: 8),
                     _textField(
-                      c,
                       controller: _lastNameController,
                       hint: 'Santos',
                       textCapitalization: TextCapitalization.words,
@@ -273,19 +257,17 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
             ],
           ),
           const SizedBox(height: 16),
-          _label('Email', c),
+          _label('Email'),
           const SizedBox(height: 8),
           _textField(
-            c,
             controller: _emailController,
             hint: 'you@example.com',
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 16),
-          _label('Password', c),
+          _label('Password'),
           const SizedBox(height: 8),
           _textField(
-            c,
             controller: _passwordController,
             hint: 'Password',
             obscureText: _obscurePassword,
@@ -293,57 +275,57 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
               icon: Icon(
                 _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                color: c.textSecondary,
+                color: KKBColors.lightTextSecondary,
                 size: 22,
               ),
             ),
           ),
           if (_password.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _buildStrengthMeter(c),
+            _buildStrengthMeter(),
             const SizedBox(height: 10),
-            _requirement('At least 8 characters', _hasLength, c),
+            _requirement('At least 5 characters', _hasLength),
             const SizedBox(height: 4),
-            _requirement('Includes a number', _hasNumber, c),
+            _requirement('Includes a number', _hasNumber),
             const SizedBox(height: 4),
-            _requirement('Includes an uppercase letter', _hasUppercase, c),
+            _requirement('Includes an uppercase letter', _hasUppercase),
           ],
           if (_error != null) ...[
             const SizedBox(height: 16),
-            _errorText(c),
+            _errorText(),
           ],
           const SizedBox(height: 20),
-          _primaryButton(c, label: 'Create account', onPressed: _onCreateAccount),
+          KKBButton(label: 'Create account', isLoading: _loading, onPressed: _onCreateAccount),
         ],
       ),
     );
   }
 
-  Widget _buildVerifyCard(_SignupColors c) {
-    return Container(
+  Widget _buildVerifyCard() {
+    return KKBCard(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
-      decoration: _cardDecoration(c),
+      radius: 24,
+      hasShadow: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text.rich(
             TextSpan(
-              style: TextStyle(fontSize: 14, color: c.textSecondary),
+              style: TextStyle(fontSize: 14, color: KKBColors.lightTextSecondary),
               children: [
                 const TextSpan(text: 'We sent a 6-digit code to '),
                 TextSpan(
                   text: _emailController.text.trim(),
-                  style: TextStyle(fontWeight: FontWeight.w700, color: c.textPrimary),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: KKBColors.lightTextPrimary),
                 ),
                 const TextSpan(text: '.'),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          _label('Verification code', c),
+          _label('Verification code'),
           const SizedBox(height: 8),
           _textField(
-            c,
             controller: _codeController,
             hint: '123456',
             keyboardType: TextInputType.number,
@@ -354,18 +336,18 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
           ),
           if (_error != null) ...[
             const SizedBox(height: 16),
-            _errorText(c),
+            _errorText(),
           ],
           const SizedBox(height: 20),
-          _primaryButton(c, label: 'Verify email', onPressed: _onVerify),
+          KKBButton(label: 'Verify email', isLoading: _loading, onPressed: _onVerify),
           const SizedBox(height: 16),
           Center(
             child: Text.rich(
               TextSpan(
-                style: TextStyle(fontSize: 13, color: c.textSecondary),
+                style: TextStyle(fontSize: 13, color: KKBColors.lightTextSecondary),
                 children: [
                   const TextSpan(text: 'Didn\'t get it? '),
-                  _linkSpan('Resend code', _loading ? null : _onResendCode, c, fontSize: 13),
+                  _linkSpan('Resend code', _loading ? null : _onResendCode, fontSize: 13),
                 ],
               ),
             ),
@@ -375,11 +357,11 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
     );
   }
 
-  Widget _buildStrengthMeter(_SignupColors c) {
+  Widget _buildStrengthMeter() {
     final (label, color) = switch (_strength) {
-      3 => ('Strong', c.success),
-      2 => ('Fair', c.primary),
-      _ => ('Weak', c.error),
+      3 => ('Strong', KKBColors.lightTextSuccess),
+      2 => ('Fair', KKBColors.lightPrimary),
+      _ => ('Weak', KKBColors.lightTextError),
     };
 
     return Row(
@@ -389,7 +371,7 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
             child: Container(
               height: 4,
               decoration: BoxDecoration(
-                color: i < _strength ? color : c.border,
+                color: i < _strength ? color : KKBColors.lightBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -405,8 +387,8 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
     );
   }
 
-  Widget _requirement(String text, bool met, _SignupColors c) {
-    final color = met ? c.success : c.textSecondary;
+  Widget _requirement(String text, bool met) {
+    final color = met ? KKBColors.lightTextSuccess : KKBColors.lightTextSecondary;
     return Row(
       children: [
         Icon(
@@ -420,115 +402,43 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
     );
   }
 
-  Widget _errorText(_SignupColors c) {
+  Widget _errorText() {
     return Text(
       _error!,
-      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: c.error),
+      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: KKBColors.lightTextError),
     );
   }
 
-  Widget _primaryButton(_SignupColors c, {required String label, required VoidCallback onPressed}) {
-    return SizedBox(
-      height: 50,
-      child: FilledButton(
-        onPressed: _loading ? null : onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: c.primary,
-          foregroundColor: c.onPrimary,
-          disabledBackgroundColor: c.primary.withValues(alpha: 0.6),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        child: _loading
-            ? SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: c.onPrimary),
-              )
-            : Text(label),
-      ),
-    );
-  }
-
-  Widget _buildDivider(_SignupColors c) {
+  Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: c.border, thickness: 1)),
+        Expanded(child: Divider(color: KKBColors.lightBorder, thickness: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             'or',
-            style: TextStyle(fontSize: 13, color: c.textSecondary),
+            style: TextStyle(fontSize: 13, color: KKBColors.lightTextSecondary),
           ),
         ),
-        Expanded(child: Divider(color: c.border, thickness: 1)),
+        Expanded(child: Divider(color: KKBColors.lightBorder, thickness: 1)),
       ],
     );
   }
 
-  Widget _buildGoogleButton(_SignupColors c) {
-    return SizedBox(
-      height: 50,
-      child: OutlinedButton(
-        onPressed: _loading ? null : _onGoogleSignUp,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: c.textPrimary,
-          backgroundColor: c.surface,
-          side: BorderSide(color: c.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 22,
-              height: 22,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: c.textPrimary, width: 1.2),
-              ),
-              child: Text(
-                'G',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  color: c.textPrimary,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Sign up with Google',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSignIn(_SignupColors c) {
+  Widget _buildSignIn() {
     return Text.rich(
       TextSpan(
-        style: TextStyle(fontSize: 14, color: c.textSecondary),
+        style: TextStyle(fontSize: 14, color: KKBColors.lightTextSecondary),
         children: [
           const TextSpan(text: 'Already have an account? '),
-          _linkSpan('Sign in', _onSignIn, c),
+          _linkSpan('Sign in', _onSignIn),
         ],
       ),
       textAlign: TextAlign.center,
     );
   }
 
-  InlineSpan _linkSpan(String text, VoidCallback? onTap, _SignupColors c, {double fontSize = 14}) {
+  InlineSpan _linkSpan(String text, VoidCallback? onTap, {double fontSize = 14}) {
     return WidgetSpan(
       alignment: PlaceholderAlignment.baseline,
       baseline: TextBaseline.alphabetic,
@@ -539,26 +449,26 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: FontWeight.w800,
-            color: c.link,
+            color: KKBColors.lightLink,
           ),
         ),
       ),
     );
   }
 
-  Widget _label(String text, _SignupColors c) {
+  Widget _label(String text) {
     return Text(
       text,
       style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w600,
-        color: c.textPrimary,
+        color: KKBColors.lightTextPrimary,
       ),
     );
   }
 
   Widget _textField(
-    _SignupColors c, {
+    {
     required TextEditingController controller,
     required String hint,
     TextInputType? keyboardType,
@@ -579,17 +489,17 @@ class _SignupIndexState extends ConsumerState<SignupIndex> {
       inputFormatters: inputFormatters,
       obscureText: obscureText,
       enabled: !_loading,
-      style: TextStyle(fontSize: 15, color: c.textPrimary),
+      style: TextStyle(fontSize: 15, color: KKBColors.lightTextPrimary),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: c.textSecondary.withValues(alpha: 0.6)),
+        hintStyle: TextStyle(color: KKBColors.lightTextSecondary.withValues(alpha: 0.6)),
         filled: true,
-        fillColor: c.background,
+        fillColor: KKBColors.lightBackground,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         suffixIcon: suffixIcon,
-        enabledBorder: border(c.border),
-        disabledBorder: border(c.border),
-        focusedBorder: border(c.primary),
+        enabledBorder: border(KKBColors.lightBorder),
+        disabledBorder: border(KKBColors.lightBorder),
+        focusedBorder: border(KKBColors.lightPrimary),
       ),
     );
   }
@@ -631,25 +541,4 @@ class _LogoCircles extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SignupColors {
-  _SignupColors(this.isDark);
-
-  final bool isDark;
-
-  Color get background =>
-      isDark ? KKBColors.darkBackground : KKBColors.lightBackground;
-  Color get surface => isDark ? KKBColors.darkSurface : KKBColors.lightSurface;
-  Color get border => isDark ? KKBColors.darkBorder : KKBColors.lightBorder;
-  Color get textPrimary =>
-      isDark ? KKBColors.darkTextPrimary : KKBColors.lightTextPrimary;
-  Color get textSecondary =>
-      isDark ? KKBColors.darkTextSecondary : KKBColors.lightTextSecondary;
-  Color get link => isDark ? KKBColors.darkLink : KKBColors.lightLink;
-  Color get primary => isDark ? KKBColors.darkPrimary : KKBColors.lightPrimary;
-  Color get onPrimary =>
-      isDark ? KKBColors.darkOnPrimary : KKBColors.lightOnPrimary;
-  Color get success => isDark ? KKBColors.darkOwed : KKBColors.lightTextSuccess;
-  Color get error => isDark ? KKBColors.darkOwe : KKBColors.lightTextError;
 }

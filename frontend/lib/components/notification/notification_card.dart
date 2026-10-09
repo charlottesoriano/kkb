@@ -1,4 +1,6 @@
+import 'package:KKB/components/global/card.dart';
 import 'package:KKB/components/global/member_avatar.dart';
+import 'package:KKB/components/global/status_chip.dart';
 import 'package:KKB/components/global/svg_icon.dart';
 import 'package:KKB/const/colors.dart';
 import 'package:KKB/const/icons.dart';
@@ -39,13 +41,7 @@ class NotificationCard extends StatelessWidget {
     final fromUser = notification.fromUser;
     final fromName = fromUser.firstName.isNotEmpty ? fromUser.firstName : fromUser.displayName;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: KKBColors.lightSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: KKBColors.lightBorder),
-      ),
+    return KKBCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 12,
@@ -85,8 +81,8 @@ class NotificationCard extends StatelessWidget {
                   runSpacing: 6,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _Chip(label: 'From $fromName'),
-                    const _Chip(label: 'To you'),
+                    StatusChip(label: 'From $fromName'),
+                    const StatusChip(label: 'To you'),
                     Text(_timestamp, style: KKBTextStyles.bodyXSmall.copyWith(color: KKBColors.lightTextSecondary)),
                   ],
                 ),
@@ -95,24 +91,6 @@ class NotificationCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _Chip extends StatelessWidget {
-  const _Chip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: KKBColors.lightChip,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(label, style: KKBTextStyles.bodyXSmallBold.copyWith(color: KKBColors.lightTextPrimary)),
     );
   }
 }
