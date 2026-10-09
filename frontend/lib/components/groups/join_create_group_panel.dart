@@ -1,5 +1,6 @@
 import 'package:KKB/models/response_status.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,7 +78,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
       if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Group joined successfully'), backgroundColor: KKBColors.lightTextSuccess));
       if(mounted && context.mounted) Navigator.pop(context);
     } else {
-      if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      if(mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
     }
   }
 
@@ -100,7 +101,7 @@ class _JoinCreateGroupPanelState extends ConsumerState<JoinCreateGroupPanel> {
       if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Group created successfully'), backgroundColor: KKBColors.lightTextSuccess));
       if(mounted && context.mounted) Navigator.pop(context);
     } else {
-      if(mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      if(mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
       setState(() {
         _nameController.text = '';
         _descriptionController.text = '';

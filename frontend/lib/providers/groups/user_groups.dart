@@ -161,7 +161,7 @@ class UserGroups extends _$UserGroups {
     if(groups.isNotEmpty) setSelectedGroup(groups.first);
     //the selected group is a copy, swap in the fresh one so new members show up
     for (final group in groups) {
-      ref.read(selectedGroupProvider.notifier).syncGroup(group);
+      ref.read(selectedGroupProvider.notifier).fetchGroupData(group);
     }
 
     state = groups;

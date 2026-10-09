@@ -9,7 +9,7 @@ import 'package:KKB/providers/global/graphql_client.dart';
 // the system tray already shows notification pushes, so there's nothing to do yet
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundHandler(RemoteMessage message) async {
-  
+
 }
 
 StreamSubscription<String>? _tokenRefresh;

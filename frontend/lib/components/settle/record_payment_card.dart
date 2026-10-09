@@ -7,6 +7,7 @@ import 'package:KKB/providers/groups/group_expenses.dart';
 import 'package:KKB/providers/groups/group_settlements.dart';
 import 'package:KKB/providers/groups/selected_group.dart';
 import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -84,7 +85,7 @@ class _RecordPaymentCardState extends ConsumerState<RecordPaymentCard> {
       if (mounted && context.mounted) FocusScope.of(context).unfocus();
       if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Payment recorded'), backgroundColor: KKBColors.lightTextSuccess));
     } else {
-      if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      if (mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
     }
   }
 

@@ -76,7 +76,9 @@ export class ExpensesService {
         ...updateExpenseInput,
         updated_at: new Date(),
       })
-      .eq('id', id);
+      .eq('id', id)
+      .select(EXPENSE_SELECT)
+      .single();
     if (error) throw error;
     return data;
   }

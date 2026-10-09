@@ -9,6 +9,7 @@ import 'package:KKB/providers/auth/current_user.dart';
 import 'package:KKB/providers/groups/group_balances.dart';
 import 'package:KKB/providers/groups/group_settlements.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +59,7 @@ class _FavoriteGroupsListState extends ConsumerState<FavoriteGroupsList> {
   Future<void> _toggleFavorite(Group group) async {
     final result = await ref.read(userGroupsProvider.notifier).toggleFavorite(group.id);
     if (!result.status) {
-      if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Could not update favorites'), backgroundColor: KKBColors.lightTextError));
+      if (mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.update);
       return;
     }
     widget.onToggleFavorite?.call(group, result.body as bool);

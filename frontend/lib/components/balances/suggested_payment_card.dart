@@ -5,6 +5,7 @@ import 'package:KKB/core/router.dart';
 import 'package:KKB/models/group.dart';
 import 'package:KKB/providers/groups/group_settlements.dart';
 import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -30,10 +31,11 @@ class _SuggestedPaymentCardState extends ConsumerState<SuggestedPaymentCard> {
     final result = await ref.read(groupSettlementsProvider(widget.group.id).notifier).sendReminder(widget.payment.from, widget.payment.amount);
     if (!mounted) return;
     setState(() => _sending = false);
+    if (!result.status) return Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(result.message ?? 'An error occurred'),
-        backgroundColor: result.status ? KKBColors.lightTextSuccess : KKBColors.lightTextError,
+        content: Text(result.message ?? 'Reminder sent'),
+        backgroundColor: KKBColors.lightTextSuccess,
       ),
     );
   }

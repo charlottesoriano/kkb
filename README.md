@@ -25,6 +25,9 @@ CLERK_SECRET_KEY=
 CLERK_WEBHOOK_SIGNING_SECRET=
 SUPABASE_URL=
 SUPABASE_SERVICE_KEY=
+FIREBASE_PROJECT_ID=
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY=
 ```
 
 #### Clerk
@@ -55,6 +58,30 @@ ngrok http 3000
 3. **`SUPABASE_SERVICE_KEY`** — go to **Project Settings → API Keys** and copy the **secret** key (`sb_secret_...`), or the legacy **`service_role`** key.
 
 > The service key bypasses Row Level Security. Keep it on the backend only — never commit it or expose it to the frontend.
+
+#### Firebase
+
+These let the backend send push notifications through Firebase Cloud Messaging. See [`PUSH_NOTIFICATIONS.md`](PUSH_NOTIFICATIONS.md) for the full push setup (Firebase CLI, `flutterfire configure`, etc.).
+
+1. Sign in to the [Firebase Console](https://console.firebase.google.com) and select (or create) your project.
+2. Go to **Project settings → Service accounts** and click **Generate new private key**. A JSON file downloads.
+3. Copy these fields from the JSON into `backend/.env`:
+
+   | `.env` variable | JSON field |
+   | --- | --- |
+   | `FIREBASE_PROJECT_ID` | `project_id` |
+   | `FIREBASE_CLIENT_EMAIL` | `client_email` |
+   | `FIREBASE_PRIVATE_KEY` | `private_key` |
+
+   ```env
+   FIREBASE_PROJECT_ID=...
+   FIREBASE_CLIENT_EMAIL=...
+   FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+   ```
+
+4. Delete the downloaded JSON file.
+
+> Keep the quotes and the literal `\n`s on the private key; the backend turns them back into newlines. Like the Supabase service key, these credentials are backend-only — never commit them.
 
 ### 3. Create the database tables
 

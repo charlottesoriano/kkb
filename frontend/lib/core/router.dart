@@ -7,6 +7,7 @@ import 'package:KKB/components/groups/index.dart';
 import 'package:KKB/components/balances/index.dart';
 import 'package:KKB/components/settings/index.dart';
 import 'package:KKB/components/signin/index.dart';
+import 'package:KKB/components/signup/index.dart';
 import 'package:KKB/components/settle/index.dart';
 import 'package:KKB/providers/groups/selected_group.dart';
 import 'package:flutter/widgets.dart';
@@ -17,6 +18,7 @@ import 'package:go_router/go_router.dart';
 /// Route paths in one place so you never mistype them
 class AppRoutes {
   static const login = '/login';
+  static const signup = '/signup';
 
   // main navigation
   static const groups = '/groups';
@@ -53,7 +55,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final signedIn = clerk.isSignedIn;
       final location = state.matchedLocation;
-      final onLogin = location == AppRoutes.login;
+      final onLogin = location == AppRoutes.login || location == AppRoutes.signup;
 
       if (!signedIn && !onLogin) return AppRoutes.login;
       if (signedIn && onLogin) return AppRoutes.groups;
@@ -69,6 +71,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const SigninIndex(),
+      ),
+      GoRoute(
+        path: AppRoutes.signup,
+        builder: (context, state) => const SignupIndex(),
       ),
 
       // top level, so it opens on the root navigator and hides the bottom navigation

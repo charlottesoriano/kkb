@@ -6,6 +6,7 @@ import 'package:KKB/providers/global/preferred_mode.dart';
 import 'package:KKB/providers/groups/user_groups.dart';
 import 'package:KKB/providers/settings/user_profile.dart';
 import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -84,8 +85,9 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
       ref.invalidate(userGroupsProvider);
     } else {
       setState(() => _saving = false);
+      return Helper.showErrorSnackBar(context, response.message, action: DbAction.update);
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.message ?? 'Could not update profile')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.message ?? 'Profile updated')));
   }
 
   Future<void> _logout() async {
@@ -105,7 +107,7 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
 
     if (mounted) {
       setState(() => _loggingOut = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.message ?? 'Could not log out')));
+      Helper.showErrorSnackBar(context, response.message);
     }
   }
 
@@ -129,7 +131,7 @@ class _SettingsIndexState extends ConsumerState<SettingsIndex> {
     if (response.status) {
       _logout();
     } else {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(response.message ?? 'Could not delete account')));
+      if (mounted) Helper.showErrorSnackBar(context, response.message, action: DbAction.delete);
     }
   }
 

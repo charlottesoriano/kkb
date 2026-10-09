@@ -136,7 +136,9 @@ export class GroupsService {
     const { data, error } = await this.db
       .from('groups')
       .update(input)
-      .eq('id', groupId);
+      .eq('id', groupId)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }
@@ -145,7 +147,9 @@ export class GroupsService {
     const { data, error } = await this.db
       .from('groups')
       .delete()
-      .eq('id', groupId);
+      .eq('id', groupId)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }

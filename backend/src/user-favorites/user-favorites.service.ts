@@ -39,7 +39,9 @@ export class UserFavoritesService {
     const { data, error } = await this.db
       .from('user_favorites')
       .update(updateUserFavoriteInput)
-      .eq('id', id);
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }
@@ -48,7 +50,9 @@ export class UserFavoritesService {
     const { data, error } = await this.db
       .from('user_favorites')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   }

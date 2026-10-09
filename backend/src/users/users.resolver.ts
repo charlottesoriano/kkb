@@ -3,7 +3,6 @@ import { UseGuards } from '@nestjs/common';
 import { ClerkGuard } from '../auth/auth.guard.js';
 import { UsersService } from './users.service.js';
 import { User } from './entities/user.entity.js';
-import { CreateUserInput } from './dto/create-user.input.js';
 import { UpdateUserInput } from './dto/update-user.input.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 
@@ -12,9 +11,10 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
+  //called by the app after sign up, the user id comes from the Clerk token
   @Mutation(() => User)
-  createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
-    return this.usersService.create(createUserInput);
+  syncUser(@CurrentUser() userId: string) {
+    return this.usersService.syncFromClerk(userId);
   }
 
   @Query(() => User, { name: 'user' })
@@ -23,8 +23,8 @@ export class UsersResolver {
   }
 
   @Mutation(() => User)
-  updateUser(@Args('updateUserInput') updateUserInput: UpdateUserInput) {
-    return this.usersService.update(updateUserInput.id, updateUserInput);
+  updateUser(@CurrentUser() userId: string, @Args('updateUserInput') updateUserInput: UpdateUserInput) {
+    return this.usersService.update(userId, updateUserInput);
   }
 
   @Mutation(() => User)

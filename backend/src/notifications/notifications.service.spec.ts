@@ -1,15 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { createSupabaseMock } from '../../test/supabase-mock.js';
 import { NotificationsService } from './notifications.service.js';
 
 describe('NotificationsService', () => {
+  let db: any;
+  let queue: (...r: any[]) => void;
   let service: NotificationsService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [NotificationsService],
-    }).compile();
-
-    service = module.get<NotificationsService>(NotificationsService);
+  beforeEach(() => {
+    ({ db, queue } = createSupabaseMock());
+    service = new NotificationsService(db, { send: vi.fn() } as any);
   });
 
   it('should be defined', () => {

@@ -16,6 +16,7 @@ import 'package:KKB/providers/groups/group_expenses.dart';
 import 'package:KKB/providers/groups/selected_group.dart';
 import 'package:KKB/core/router.dart';
 import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -110,7 +111,7 @@ class _AddExpensesIndexState extends ConsumerState<AddExpensesIndex> {
       if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'Expense added successfully'), backgroundColor: KKBColors.lightTextSuccess));
       if (mounted && context.mounted) context.canPop() ? context.pop() : context.go(AppRoutes.groupExpenses);
     } else {
-      if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      if (mounted && context.mounted) Helper.showErrorSnackBar(context, result.message, action: DbAction.insert);
     }
   }
 

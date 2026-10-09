@@ -1,5 +1,6 @@
 import 'package:KKB/core/auth.dart';
 import 'package:KKB/core/router.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,8 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _loading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -25,8 +28,32 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
     super.dispose();
   }
 
-  void _onSignIn() {
+  Future<void> _onSignIn() async {
+    FocusScope.of(context).unfocus();
+    final authService = ref.read(authServiceProvider);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
+    String? problem;
+    if (!authService.validateEmail(email)) {
+      problem = 'Please enter a valid email.';
+    } else if (password.isEmpty) {
+      problem = 'Please enter your password.';
+    }
+    setState(() => _error = problem);
+    if (problem != null) return;
+
+    setState(() => _loading = true);
+    final result = await authService.authLogin(email: email, password: password);
+    if (!mounted) return;
+    setState(() => _loading = false);
+
+    if (result.status) {
+      GoRouter.of(context).go(AppRoutes.groups);
+    } else if (!(result.body is Map && result.body['errorShown'] == true)) {
+      // Clerk errors (e.g. wrong password) are already shown by ClerkErrorListener
+      setState(() => _error = result.message);
+    }
   }
 
   Future<void> _onGoogleSignIn() async {
@@ -35,7 +62,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
     if (result.status) {
       GoRouter.of(context).go(AppRoutes.groups);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred')));
+      Helper.showErrorSnackBar(context, result.message);
     }
   }
 
@@ -45,7 +72,7 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
   }
 
   void _onCreateAccount() {
-
+    GoRouter.of(context).go(AppRoutes.signup);
   }
 
   @override
@@ -171,14 +198,26 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
               ),
             ),
           ),
+          if (_error != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: c.error,
+              ),
+            ),
+          ],
           const SizedBox(height: 20),
           SizedBox(
             height: 50,
             child: FilledButton(
-              onPressed: _onSignIn,
+              onPressed: _loading ? null : _onSignIn,
               style: FilledButton.styleFrom(
                 backgroundColor: c.primary,
                 foregroundColor: c.onPrimary,
+                disabledBackgroundColor: c.primary.withValues(alpha: 0.6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -187,7 +226,13 @@ class _SigninIndexState extends ConsumerState<SigninIndex> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              child: const Text('Sign in'),
+              child: _loading
+                  ? SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2.5, color: c.onPrimary),
+                    )
+                  : const Text('Sign in'),
             ),
           ),
           const SizedBox(height: 20),
@@ -376,4 +421,5 @@ class _SigninColors {
   Color get primary => isDark ? KKBColors.darkPrimary : KKBColors.lightPrimary;
   Color get onPrimary =>
       isDark ? KKBColors.darkOnPrimary : KKBColors.lightOnPrimary;
+  Color get error => isDark ? KKBColors.darkOwe : KKBColors.lightTextError;
 }

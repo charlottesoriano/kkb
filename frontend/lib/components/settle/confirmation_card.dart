@@ -6,6 +6,7 @@ import 'package:KKB/providers/auth/current_user.dart';
 import 'package:KKB/providers/groups/group_settlements.dart';
 import 'package:KKB/providers/groups/selected_group.dart';
 import 'package:KKB/utils/text_styles.dart';
+import 'package:KKB/utils/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +29,7 @@ class _ConfirmationCardState extends ConsumerState<ConfirmationCard> {
     if (!mounted) return;
     setState(() => _busyId = null);
     if (!result.status && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.message ?? 'An error occurred'), backgroundColor: KKBColors.lightTextError));
+      Helper.showErrorSnackBar(context, result.message, action: DbAction.update);
     }
   }
 
