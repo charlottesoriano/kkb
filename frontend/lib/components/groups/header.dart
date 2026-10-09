@@ -11,11 +11,7 @@ class GroupsHeader extends ConsumerStatefulWidget {
 
   final VoidCallback onAddGroup;
 
-  /// Two lines at 28px (see [MTextStyles.headerLarge]) plus vertical padding inside the toolbar.
   static const double toolbarHeightForTwoLineTitle = 80;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(toolbarHeightForTwoLineTitle);
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _GroupsHeaderState();
