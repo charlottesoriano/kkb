@@ -1,26 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input.js';
 import { UpdateUserInput } from './dto/update-user.input.js';
+import { SUPABASE } from '../supabase/supabase.provider.js';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class UsersService {
-  create(createUserInput: CreateUserInput) {
+  constructor(
+    @Inject(SUPABASE) private db: SupabaseClient
+  ) {}
+
+  async create(createUserInput: CreateUserInput) {
+    const { data, error } = await this.db.from('users').insert(createUserInput);
+    if (error) throw error;
     return 'This action adds a new user';
   }
-
-  findAll() {
-    return `This action returns all users`;
+  
+  async findOne(id: String) {
+    const { data, error } = await this.db.from('users').select('*').eq('id', id);
+    if (error) throw error;
+    return data;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async update(id: String, updateUserInput: UpdateUserInput) {
+    const { data, error } = await this.db.from('users').update(updateUserInput).eq('id', id);
+    if (error) throw error;
+    return data;
   }
 
-  update(id: number, updateUserInput: UpdateUserInput) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: String) {
+    //just update the deleted_at to the current date time
+    const { data, error } = await this.db.from('users').update({ deleted_at: new Date().toISOString() }).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
   }
 }

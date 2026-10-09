@@ -9,10 +9,10 @@ export class UserFavoritesService {
   constructor(
     @Inject(SUPABASE) private db: SupabaseClient
   ) {}
-  async create(createUserFavoriteInput: CreateUserFavoriteInput) {
+  async create(createUserFavoriteInput: CreateUserFavoriteInput, userId: string) {
     const { data, error } = await this.db
       .from('user_favorites')
-      .insert(createUserFavoriteInput);
+      .insert({ ...createUserFavoriteInput, user_id: userId });
     if (error) throw error;
     return data;
   }

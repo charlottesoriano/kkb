@@ -1,7 +1,7 @@
-import { AuthGuard } from './auth.guard.js';
+import { ClerkGuard } from './auth.guard.js';
 
-describe('AuthGuard', () => {
+describe('ClerkGuard', () => {
   it('should be defined', () => {
-    expect(new AuthGuard()).toBeDefined();
+    expect(new ClerkGuard()).toBeDefined();
   });
 });

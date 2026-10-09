@@ -7,6 +7,6 @@ export class UpdateSettlementInput extends PartialType(CreateSettlementInput) {
   id: number;
   @Field(() => String, { description: 'Settlement status' })
   status: string;
-  @Field(() => Float, { description: 'Settlement amount' })
-  amount: number;
+  @Field(() => Float, { description: 'Settlement amount', nullable: true })
+  amount?: number;
 }
