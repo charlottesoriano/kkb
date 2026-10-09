@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.charlotte.kkb
 
 import io.flutter.embedding.android.FlutterActivity
 

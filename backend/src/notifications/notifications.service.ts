@@ -1,12 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE } from '../supabase/supabase.provider.js';
 import { SendReminderInput } from './dto/send-reminder.input.js';
+import { Messaging } from 'firebase-admin/messaging';
+import { FIREBASE_MESSAGING } from './firebase.provider.js';
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
   constructor(
-    @Inject(SUPABASE) private db: SupabaseClient
+    @Inject(SUPABASE) private db: SupabaseClient,
+    @Inject(FIREBASE_MESSAGING) private messaging: Messaging
   ) {}
 
   async create(fromUser: string, toUser: string, title: string, description: string) {
@@ -16,6 +20,7 @@ export class NotificationsService {
       .select()
       .single();
     if (error) throw error;
+    await this.push(toUser, title, description);
     return data;
   }
 
@@ -29,6 +34,7 @@ export class NotificationsService {
     if (groupError) throw groupError;
 
     const amountText = amount.toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+    await this.push(to_user, 'Payment reminder', `${sender.first_name ?? sender.display_name} reminded you to pay ${amountText} in ${group.name}`);
     return this.create(
       fromUser,
       to_user,
@@ -36,4 +42,33 @@ export class NotificationsService {
       `${sender.first_name ?? sender.display_name} reminded you to pay ${amountText} in ${group.name}`,
     );
   }
+
+  async registerDeviceToken(userId: string, token: string) {
+    const { error } = await this.db
+      .from('device_tokens')
+      .upsert({ user_id: userId, token, updated_at: new Date().toISOString() }, { onConflict: 'user_id,token' });
+    if (error) throw error;
+    return true;
+  }
+
+  private async push(userId: string, title: string, body: string) {
+    try {
+      const { data: rows, error } = await this.db.from('device_tokens').select('token').eq('user_id', userId);
+      if (error) throw error;
+      if (!rows.length) return;
+
+      const tokens = rows.map((row) => row.token);
+      const result = await this.messaging.sendEachForMulticast({ tokens, notification: { title, body } });
+
+      // FCM rejects tokens from uninstalled apps or expired installs; drop them so they aren't retried
+      const dead = tokens.filter((_, i) => {
+        const code = result.responses[i].error?.code;
+        return code === 'messaging/registration-token-not-registered' || code === 'messaging/invalid-registration-token';
+      });
+      if (dead.length) await this.db.from('device_tokens').delete().in('token', dead);
+    } catch (e) {
+      this.logger.warn(`Push to ${userId} failed: ${e}`);
+    }
+  }
 }
+{}

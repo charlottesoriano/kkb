@@ -15,4 +15,9 @@ export class NotificationsResolver {
   sendReminder(@Args('sendReminderInput') sendReminderInput: SendReminderInput, @CurrentUser() userId: string) {
     return this.notificationsService.sendReminder(userId, sendReminderInput);
   }
+
+  @Mutation(() => Boolean)
+  registerDeviceToken(@Args('token') token: string, @CurrentUser() userId: string) {
+    return this.notificationsService.registerDeviceToken(userId, token);
+  }
 }
